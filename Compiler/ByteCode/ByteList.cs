@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,9 +8,15 @@ using System.Threading.Tasks;
 
 namespace Compiler.ByteCode
 {
-    internal class ByteList
+    public class ByteList : ICollection<byte>
     {
         private List<byte> list = new();
+
+        public int Count => list.Count;
+
+        public bool IsReadOnly => false;
+
+        public byte this[int index] { get => list[index]; set => list[index] = value; }
 
         #region Add
         private void AddLeRange(byte[] range)
@@ -33,32 +40,32 @@ namespace Compiler.ByteCode
             list.Add(value);
         }
 
-        public void Add(short value)
+        public void Add(Int16 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
 
-        public void Add(ushort value)
+        public void Add(UInt16 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
 
-        public void Add(int value)
+        public void Add(Int32 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
 
-        public void Add(uint value)
+        public void Add(UInt32 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
 
-        public void Add(long value)
+        public void Add(Int64 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
 
-        public void Add(ulong value)
+        public void Add(UInt64 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
         }
@@ -84,85 +91,108 @@ namespace Compiler.ByteCode
         }
         #endregion Add
 
-        #region Insert
-
-        private void InsertLeRange(int index, byte[] range)
+        #region WriteAt
+        private void WriteLeRangeAt(int index, byte[] range)
         {
             if (!BitConverter.IsLittleEndian)
                 Array.Reverse(range);
 
-            list.InsertRange(index, range);
+            WriteAt(index, range);
         }
 
-        public void Insert(int index, sbyte value)
+        public void WriteAt(int index, sbyte value)
         {
             unsafe
             {
-                list.Insert(index, *(byte*)&value);
+                list[index] = *(byte*)&value;
             }
         }
 
-        public void Insert(int index, byte value)
+        public void WriteAt(int index, Int16 value)
         {
-            list.Insert(index, value);
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, short value)
+        public void WriteAt(int index, UInt16 value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, ushort value)
+        public void WriteAt(int index, Int32 value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, int value)
+        public void WriteAt(int index, UInt32 value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, uint value)
+        public void WriteAt(int index, Int64 value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, long value)
+        public void WriteAt(int index, UInt64 value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, ulong value)
+        public void WriteAt(int index, float value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, float value)
+        public void WriteAt(int index, double value)
         {
-            InsertLeRange(index, BitConverter.GetBytes(value));
+            WriteLeRangeAt(index, BitConverter.GetBytes(value));
         }
 
-        public void Insert(int index, double value)
-        {
-            InsertLeRange(index, BitConverter.GetBytes(value));
-        }
+        public void WriteAt(int index, string value) => WriteAt(index, Encoding.UTF8.GetBytes(value));
 
-        public void Insert(int index, string value)
+        public void WriteAt<T>(int index, T value) where T : IEnumerable<byte>
         {
-            list.InsertRange(index, Encoding.UTF8.GetBytes(value));
+            foreach (var item in value)
+                list[index++] = item;
         }
-
-        public void Insert(int index, IEnumerable<byte> value)
-        {
-            list.InsertRange(index, value);
-        }
-        #endregion Insert
+        #endregion WriteAt
 
         public void AdvanceBy(int count)
         {
             for (int i = 0; i < count; i++)
-                list.Add(0);
+                list.Add((byte)0);
         }
+
         public byte[] ToArray() => list.ToArray();
+
+        public void Clear()
+        {
+            list.Clear();
+        }
+
+        public bool Contains(byte item)
+        {
+            return list.Contains(item);
+        }
+
+        public void CopyTo(byte[] array, int arrayIndex)
+        {
+            list.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(byte item)
+        {
+            return list.Remove(item);
+        }
+
+        public IEnumerator<byte> GetEnumerator()
+        {
+            return ((IEnumerable<byte>)list).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)list).GetEnumerator();
+        }
     }
 }

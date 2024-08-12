@@ -10,18 +10,18 @@ namespace Compiler.ByteCode
     public enum OpCode
     {
         Nop = 0x00,
-        Br, // i16
-        BrTrue, // i16
-        BrFalse, // i16
-        Exit,
+        // Br i16
+        // BrTrue i16
+        // BrFalse i16
+        // Exit,
 
-        Call, // i16
-        Ret,
-        Pop,
+        Call = 0x06, // u16
+        // Ret
+        Pop = 0x08,
         LocalGet, // u16
         LocalSet, // u16
 
-        I8Const, // i8
+        I8Const = 0x0C, // i8
         I16Const, // i16
         I32Const, // i32
         I64Const, // i64
@@ -103,55 +103,72 @@ namespace Compiler.ByteCode
 
     }
 
+    public class InvalidInstructionException : Exception
+    {
+        public InvalidInstructionException(string opCode) : base("Invalid instruction in final bytecode: " + opCode)
+        {
+        }
+    }
+
     [StructLayout(LayoutKind.Explicit)]
     public struct Instruction
     {
         [FieldOffset(0)] public readonly OpCode OpCode;
 
         [FieldOffset(8)] public readonly sbyte i8;
-        [FieldOffset(8)] public readonly short i16;
-        [FieldOffset(8)] public readonly int i32;
-        [FieldOffset(8)] public readonly long i64;
-        [FieldOffset(8)] public readonly ushort u16;
+        [FieldOffset(8)] public readonly Int16 i16;
+        [FieldOffset(8)] public readonly Int32 i32;
+        [FieldOffset(8)] public readonly Int64 i64;
+        [FieldOffset(8)] public readonly UInt16 u16;
 
-        public Instruction(OpCode opCode, sbyte i8)
+        public Instruction(OpCode opCode)
+        {
+            OpCode = opCode;
+        }
+
+        private Instruction(OpCode opCode, sbyte i8)
         {
             OpCode = opCode;
             this.i8 = i8;
         }
 
-        public Instruction(OpCode opCode, short i16)
+        private Instruction(OpCode opCode, Int16 i16)
         {
             OpCode = opCode;
             this.i16 = i16;
         }
 
-        public Instruction(OpCode opCode, int i32)
+        private Instruction(OpCode opCode, Int32 i32)
         {
             OpCode = opCode;
             this.i32 = i32;
         }
 
-        public Instruction(OpCode opCode, long i64)
+        private Instruction(OpCode opCode, Int64 i64)
         {
             OpCode = opCode;
             this.i64 = i64;
         }
 
-        public Instruction(OpCode opCode, ushort u16)
+        private Instruction(OpCode opCode, UInt16 u16)
         {
             OpCode = opCode;
             this.u16 = u16;
         }
+
+        public static Instruction CreateCall(UInt16 id) => new Instruction(OpCode.Call, id);
+        public static Instruction CreateLocalGet(UInt16 id) => new Instruction(OpCode.LocalGet, id);
+        public static Instruction CreateLocalSet(UInt16 id) => new Instruction(OpCode.LocalSet, id);
+        public static Instruction CreateI8Const(sbyte value) => new Instruction(OpCode.I8Const, value);
+        public static Instruction CreateI16Const(Int16 value) => new Instruction(OpCode.I16Const, value);
+        public static Instruction CreateI32Const(Int32 value) => new Instruction(OpCode.I32Const, value);
+        public static Instruction CreateI64Const(Int64 value) => new Instruction(OpCode.I64Const, value);
 
         public void WriteTo(ByteList list)
         {
             list.Add((byte)OpCode);
             switch (OpCode)
             {
-                case OpCode.Br:
-                case OpCode.BrTrue:
-                case OpCode.BrFalse:
                 case OpCode.Call:
                     list.Add(i16);
                     break;
@@ -175,7 +192,5 @@ namespace Compiler.ByteCode
                     break;
             }
         }
-
-
     }
 }

@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Compiler.ByteCode;
 
-namespace Compiler.ByteCode
+namespace Compiler.AST
 {
-    public class Function
+    public interface IExpr
     {
-        public List<Block> Blocks { get; } = new();
-
-
+        public void CodeGen(ByteCode.Func func);
     }
 }
