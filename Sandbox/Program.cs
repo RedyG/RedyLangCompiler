@@ -1,13 +1,13 @@
-﻿using Compiler.ByteCode;
-
-Module module = new();
+﻿using Compiler;
+using Compiler.AST;
+/*Module module = new();
 var main = new Func(0, 0, new List<Block> {
     new Block(
         new List<Instruction> {
             new(OpCode.I8Const, (sbyte)10),
             new(OpCode.Call, (short)1)
         },
-        BranchInstruction.CreateExit()
+        BrInstruction.CreateExit()
     )
 });
 
@@ -23,14 +23,14 @@ var thirdBlock = new Block(
         new(OpCode.Call, (short)1),
         new(OpCode.I32Add),
     },
-    BranchInstruction.CreateRet()
+    BrInstruction.CreateRet()
 );
 
 var secondBlock = new Block(
     new List<Instruction> {
         new(OpCode.LocalGet, (ushort)0),
     },
-    BranchInstruction.CreateRet()
+    BrInstruction.CreateRet()
 );
 
 var firstBlock = new Block(
@@ -39,7 +39,7 @@ var firstBlock = new Block(
         new(OpCode.I8Const, (sbyte)2),
         new(OpCode.I32Lt),
     },
-    BranchInstruction.CreateBr(secondBlock, thirdBlock)
+    BrInstruction.CreateBrIf(secondBlock, thirdBlock)
 );
 
 var fib = new Func(1, 0, new List<Block>
@@ -54,7 +54,7 @@ var list = new ByteList();
 module.WriteTo(list);
 
 
-/*var mainList = new ByteList();
+var mainList = new ByteList();
 main.WriteTo(mainList);
 File.WriteAllBytes("main.redy", mainList.ToArray());
 
@@ -62,4 +62,50 @@ var fibList = new ByteList();
 //fib.WriteTo(fibList);
 File.WriteAllBytes("fib.redy", fibList.ToArray());*/
 
-File.WriteAllBytes("test.redy", list.ToArray());
+
+/*
+
+fn fib(n: i32) -> i32 {
+    if n < 2 {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+ 
+ */
+
+/*var i32 = new Compiler.AST.Type.I32();
+var never = new Compiler.AST.Type.Never();
+
+var module = new Module();
+
+var param = new VarDeclStatement(i32);
+
+var fib = new Func(i32, new IntExpr(999), new List<VarDeclStatement> { param });
+fib.Body = new IfExpr
+(
+    never,
+    new BinOpExpr(i32, new VarUse(param), BinOp.Lt, new IntExpr(2)),
+    new ReturnExpr(new VarUse(param)),
+    new ReturnExpr(new BinOpExpr
+    (
+        i32,
+        new CallExpr(fib, new List<IExpr> { new BinOpExpr(i32, new VarUse(param), BinOp.Sub, new IntExpr(1)) }),
+        BinOp.Add,
+        new CallExpr(fib, new List<IExpr> { new BinOpExpr(i32, new VarUse(param), BinOp.Sub, new IntExpr(2)) })
+    ))
+);
+
+module.Funcs.Add(new Func(never, new CallExpr(fib, new List<IExpr> { new IntExpr(10) })));
+module.Funcs.Add(fib);
+
+var byteModule = module.CodeGen();
+
+var list = new Compiler.ByteCode.ByteList();
+byteModule.WriteTo(list);
+
+File.WriteAllBytes("testAST.redy", list.ToArray());*/
+
+
+var parser = new Parser();
+parser.Parse(new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\TextFile1.txt"));

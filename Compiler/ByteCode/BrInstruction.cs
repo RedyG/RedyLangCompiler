@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace Compiler.ByteCode
 {
-    public enum BranchOpCode
+    public enum BrOpCode
     {
-        BrBlock,
+        Br,
+        BrIf,
         Ret,
         Exit,
     }
 
-    public readonly struct BranchInstruction
+    public readonly struct BrInstruction
     {
         public const byte Br = 0x01;
         public const byte BrTrue = 0x02;
@@ -23,21 +24,23 @@ namespace Compiler.ByteCode
         public const byte Ret = 0x07;
 
 
-        public readonly BranchOpCode OpCode;
+        public readonly BrOpCode OpCode;
         public readonly Block? TrueBlock;
         public readonly Block? FalseBlock;
 
-        private BranchInstruction(BranchOpCode opCode, Block? trueBlock = null, Block? falseBlock = null)
+        private BrInstruction(BrOpCode opCode, Block? trueBlock = null, Block? falseBlock = null)
         {
             OpCode = opCode;
             TrueBlock = trueBlock;
             FalseBlock = falseBlock;
         }
 
-        public static BranchInstruction CreateExit() => new BranchInstruction(BranchOpCode.Exit);
+        public static BrInstruction CreateExit() => new BrInstruction(BrOpCode.Exit);
 
-        public static BranchInstruction CreateRet() => new BranchInstruction(BranchOpCode.Ret);
+        public static BrInstruction CreateRet() => new BrInstruction(BrOpCode.Ret);
 
-        public static BranchInstruction CreateBr(Block trueBlock, Block falseBlock) => new BranchInstruction(BranchOpCode.BrBlock, trueBlock, falseBlock);
+        public static BrInstruction CreateBr(Block block) => new BrInstruction(BrOpCode.BrIf, block);
+
+        public static BrInstruction CreateBrIf(Block trueBlock, Block falseBlock) => new BrInstruction(BrOpCode.BrIf, trueBlock, falseBlock);
     }
 }

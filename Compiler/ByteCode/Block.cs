@@ -9,17 +9,17 @@ namespace Compiler.ByteCode
     public class Block
     {
         public List<Instruction> Instructions { get; } = new();
-        public BranchInstruction BranchInstruction { get; }
+        public BrInstruction? BrInstruction { get; set; }
 
-        public Block(BranchInstruction branchInstruction)
+        public Block(BrInstruction? branchInstruction = null)
         {
-            BranchInstruction = branchInstruction;
+            BrInstruction = branchInstruction;
         }
 
-        public Block(List<Instruction> instructions, BranchInstruction branchInstruction)
+        public Block(List<Instruction> instructions, BrInstruction branchInstruction)
         {
             Instructions = instructions;
-            BranchInstruction = branchInstruction;
+            BrInstruction = branchInstruction;
         }
     }
 }

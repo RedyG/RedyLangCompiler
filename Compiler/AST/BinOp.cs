@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace Compiler.AST
 {
-    public record CodeGenContext
+    public enum BinOp
     {
-        public int CurrentVarId { get; set; } = 0;
-        public Dictionary<VarDecl, int> VarIds { get; } = new();
+        Add,
+        Sub,
+        Mul,
+        Div,
+        Lt,
     }
 }

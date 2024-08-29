@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Compiler.AST
 {
-    public interface IStatement
+    public class Field
     {
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols);
+        public Type Type { get; set; }
     }
 }

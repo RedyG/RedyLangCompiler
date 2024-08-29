@@ -23,8 +23,8 @@ namespace Compiler.ByteCode
             {
                 var func = Funcs[i];
                 int start = i * 8 + 18;
-                list.WriteAt(start, func.ArgsCount);
-                list.WriteAt(start + 2, func.LocalsCount);
+                list.WriteAt(start, (UInt16)func.ParamsCount);
+                list.WriteAt(start + 2, (UInt16)func.LocalsCount);
                 list.WriteAt(start + 4, funcOffset);
 
                 int count = list.Count;

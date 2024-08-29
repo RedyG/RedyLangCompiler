@@ -8,10 +8,17 @@ namespace Compiler.ByteCode
 {
     public class Func
     {
-        public Int16 ArgsCount { get; }
-        public Int16 LocalsCount { get; }
+        public int ParamsCount { get; }
+        public int LocalsCount { get; set; }
         public List<Block> Blocks { get; } = new();
         public Block LastBlock => Blocks[^1];
+
+        public Block AddBlock()
+        {
+            var block = new Block();
+            Blocks.Add(block);
+            return block;
+        }
 
         public void WriteTo(ByteList list)
         {
@@ -19,6 +26,10 @@ namespace Compiler.ByteCode
             for (int i = 0; i < Blocks.Count; i++)
             {
                 Block block = Blocks[i];
+
+                if (block.BrInstruction == null)
+                    throw new Exception("Branch instruction is null");
+
                 int branchesCount = branches.Count;
 
                 int initialSize = list.Count;
@@ -27,14 +38,13 @@ namespace Compiler.ByteCode
                 foreach (var instruction in block.Instructions)
                     instruction.WriteTo(list);
 
-
-                if (block.BranchInstruction.OpCode == BranchOpCode.Ret)
+                if (block.BrInstruction.Value.OpCode == BrOpCode.Ret)
                 {
-                    list.Add(BranchInstruction.Ret);
+                    list.Add(BrInstruction.Ret);
                 }
-                else if (block.BranchInstruction.OpCode == BranchOpCode.Exit)
+                else if (block.BrInstruction.Value.OpCode == BrOpCode.Exit)
                 {
-                    list.Add(BranchInstruction.Exit);
+                    list.Add(BrInstruction.Exit);
                 }
                 else
                 {
@@ -42,13 +52,13 @@ namespace Compiler.ByteCode
                         throw new Exception("Last branch instruction should be a ret or exit");
 
                     Block nextBlock = Blocks[i + 1];
-                    if (block.BranchInstruction.TrueBlock == nextBlock)
+                    if (block.BrInstruction.Value.TrueBlock == nextBlock)
                     {
-                        list.Add(BranchInstruction.BrFalse);
+                        list.Add(BrInstruction.BrFalse);
                     }
-                    else if (block.BranchInstruction.FalseBlock == nextBlock)
+                    else if (block.BrInstruction.Value.FalseBlock == nextBlock)
                     {
-                        list.Add(BranchInstruction.BrTrue);
+                        list.Add(BrInstruction.BrTrue);
                     }
                     else
                         throw new Exception("Invalid branch instruction for the moment");
@@ -69,13 +79,13 @@ namespace Compiler.ByteCode
             }
         }
 
-        public Func(Int16 argsCount, Int16 localsCount)
+        public Func(int paramsCount, int localsCount)
         {
-            ArgsCount = argsCount;
+            ParamsCount = paramsCount;
             LocalsCount = localsCount;
         }
 
-        public Func(Int16 argsCount, Int16 localsCount, List<Block> blocks) : this(argsCount, localsCount)
+        public Func(int paramsCount, int localsCount, List<Block> blocks) : this(paramsCount, localsCount)
         {
             Blocks = blocks;
         }
