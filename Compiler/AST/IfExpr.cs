@@ -39,15 +39,22 @@ namespace Compiler.AST
                 elseBlock = func.LastBlock;
             }
 
+
+            // holy shit, basically not adding the merging stuff if the blocks have their branching of their own already ( like ret )
+            if ((thenBlock.BrInstruction != null && elseBlock == null) || (thenBlock.BrInstruction != null && elseBlock != null && elseBlock.BrInstruction != null))
+            {
+                if (elseBlock == null)
+                    elseBlock = func.AddBlock();
+                conditionBlock.BrInstruction = BrInstruction.CreateBrIf(thenBlock, elseBlock);
+                return;
+            }
+
             Block? mergeBlock = func.AddBlock();
             if (thenBlock.BrInstruction == null)
                 thenBlock.BrInstruction = BrInstruction.CreateBr(mergeBlock);
 
             if (elseBlock != null && elseBlock.BrInstruction == null)
                 elseBlock.BrInstruction = BrInstruction.CreateBr(mergeBlock);
-
-            if (thenBlock.BrInstruction != null && elseBlock?.BrInstruction != null)
-                func.Blocks.RemoveAt(func.Blocks.Count - 1);
 
             conditionBlock.BrInstruction = BrInstruction.CreateBrIf(thenBlock, elseBlock == null ? mergeBlock : elseBlock);
         }

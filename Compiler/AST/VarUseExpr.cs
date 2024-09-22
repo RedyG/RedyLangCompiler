@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace Compiler.AST
 {
-    public class ReturnExpr : IExpr
+    public class VarUseExpr : IExpr
     {
-        public Type Type => new Type.Never();
-        public IExpr? Value { get; }
+        public Type Type => Var.Type;
+        public VarDeclStatement Var { get; set; }
 
-        public ReturnExpr(IExpr? value)
+        public VarUseExpr(VarDeclStatement var)
         {
-            Value = value;
+            Var = var;
         }
+
 
         public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
         {
-            Value?.CodeGen(func, funcIds, symbols);
-            func.LastBlock.BrInstruction = BrInstruction.CreateRet();
+            func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)symbols.VarIds[Var]));
         }
     }
 }

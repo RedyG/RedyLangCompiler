@@ -8,6 +8,6 @@ namespace Compiler.ParseTree
 {
     public interface IStatement : INode
     {
-        public AST.IStatement? ToAST();
+        public AST.IStatement? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols);
     }
 }

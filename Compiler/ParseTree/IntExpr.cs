@@ -17,6 +17,6 @@ namespace Compiler.ParseTree
             Value = value;
         }
 
-        TypedExpr? IExpr.ToAST() => new TypedExpr(BuiltInTypes.I32, new AST.IntExpr(Value));
+        AST.IExpr IExpr.ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false) => new AST.IntExpr(Value);
     }
 }

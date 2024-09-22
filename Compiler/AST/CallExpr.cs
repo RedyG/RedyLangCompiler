@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class CallExpr : IExpr
     {
-        public Type Type => Func.ReturnType;
+        public Type Type => Func.Proto.ReturnType;
         public Func Func { get; }
         public List<IExpr> Args { get; } = new();
 

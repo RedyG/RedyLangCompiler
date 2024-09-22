@@ -14,6 +14,8 @@ namespace Compiler
 
         // Keywords
         Pub,
+        Type,
+        Mod,
         Fn,
         If,
         Else,
@@ -31,9 +33,14 @@ namespace Compiler
         Comma,
 
         // Operators
+        Mul,
+        Div,
         Add,
         Sub,
         Lt,
+        Le,
+        Gt,
+        Ge,
         Assign,
 
 
@@ -46,6 +53,7 @@ namespace Compiler
         public static bool IsModuleItem(this TokenType type) => type switch
         {
             TokenType.Fn => true,
+            TokenType.Type => true,
             _ => false,
         };
 
@@ -53,6 +61,8 @@ namespace Compiler
         {
             TokenType.Unknown => "Unknown",
             TokenType.Pub => "pub",
+            TokenType.Type => "type",
+            TokenType.Mod => "mod",
             TokenType.Fn => "fn",
             TokenType.If => "if",
             TokenType.Else => "else",
@@ -66,9 +76,14 @@ namespace Compiler
             TokenType.Semicolon => ";",
             TokenType.Colon => ":",
             TokenType.Comma => ",",
+            TokenType.Mul => "*",
+            TokenType.Div => "/",
             TokenType.Add => "+",
             TokenType.Sub => "-",
             TokenType.Lt => "<",
+            TokenType.Le => "<=",
+            TokenType.Gt => ">",
+            TokenType.Ge => ">=",
             TokenType.Assign => "=",
             TokenType.Identifier => "Identifier",
             TokenType.IntLiteral => "IntLiteral",
@@ -150,6 +165,7 @@ namespace Compiler
     {
         private Token _token;
         public Token Token => _token;
+
         public string FileName { get; }
         public string Input { get; }
 
@@ -189,6 +205,10 @@ namespace Compiler
             }
 
             var trimmedInput = new StringSegment(Input).Subsegment(_token.Range.End.Pos);
+
+            if (trimmedInput.StartsWith("->", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.RArrow, _token.Range.End);
+
             switch (trimmedInput[0])
             {
                 case '(':
@@ -203,24 +223,43 @@ namespace Compiler
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Semicolon, _token.Range.End);
                 case ':':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Colon, _token.Range.End);
+                case '*':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Mul, _token.Range.End);
+                case '/':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Div, _token.Range.End);
                 case '+':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Add, _token.Range.End);
                 case '-':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Sub, _token.Range.End);
                 case '<':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Lt, _token.Range.End);
+                case '>':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Gt, _token.Range.End);
+                case '=':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Assign, _token.Range.End);
             }
 
             if (trimmedInput.StartsWith("fn", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.Fn, _token.Range.End);
+            if (trimmedInput.StartsWith("pub", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Pub, _token.Range.End);
+            if (trimmedInput.StartsWith("type", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Type, _token.Range.End);
+            if (trimmedInput.StartsWith("mod", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Mod, _token.Range.End);
             if (trimmedInput.StartsWith("if", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.If, _token.Range.End);
             if (trimmedInput.StartsWith("else", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Else, _token.Range.End);
             if (trimmedInput.StartsWith("return", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 6), TokenType.Return, _token.Range.End);
-            if (trimmedInput.StartsWith("->", StringComparison.CurrentCulture))
-                return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.RArrow, _token.Range.End);
+            if (trimmedInput.StartsWith("var", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Var, _token.Range.End);
+            if (trimmedInput.StartsWith("<=", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.Le, _token.Range.End);
+            if (trimmedInput.StartsWith(">=", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.Ge, _token.Range.End);
+
 
             // Identifier
             if (char.IsLetter(trimmedInput[0]) || trimmedInput[0] == '_')

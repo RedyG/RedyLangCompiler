@@ -22,7 +22,8 @@ namespace Compiler.ByteCode
 
         public void WriteTo(ByteList list)
         {
-            Stack<int> branches = new();
+            List<KeyValuePair<Block, (int Pos, Int16 Size)>> branches = new();
+
             for (int i = 0; i < Blocks.Count; i++)
             {
                 Block block = Blocks[i];
@@ -51,31 +52,45 @@ namespace Compiler.ByteCode
                     if (i + 1 == Blocks.Count)
                         throw new Exception("Last branch instruction should be a ret or exit");
 
+                    Block? trueBlock = block.BrInstruction.Value.TrueBlock;
+                    Block? falseBlock = block.BrInstruction.Value.FalseBlock;
                     Block nextBlock = Blocks[i + 1];
-                    if (block.BrInstruction.Value.TrueBlock == nextBlock)
+                    if (trueBlock == nextBlock && falseBlock != null)
                     {
                         list.Add(BrInstruction.BrFalse);
+                        branches.Add(new(falseBlock, (list.Count, 0)));
                     }
-                    else if (block.BrInstruction.Value.FalseBlock == nextBlock)
+                    else if (falseBlock == nextBlock && trueBlock != null)
                     {
                         list.Add(BrInstruction.BrTrue);
+                        branches.Add(new(trueBlock, (list.Count, 0)));
+                    }
+                    else if (trueBlock != null && falseBlock == null)
+                    {
+                        list.Add(BrInstruction.Br);
+                        branches.Add(new(trueBlock, (list.Count, 0)));
                     }
                     else
-                        throw new Exception("Invalid branch instruction for the moment");
+                        throw new Exception("Invalid branch instruction");
 
-                    branches.Push(list.Count);
                     list.Add((Int16)0);
                 }
 
                 if (branchesCount == 0)
                     continue;
 
-
                 var size = (Int16)(list.Count - initialSize);
-                Console.WriteLine(list[branches.Peek()]);
-                Console.WriteLine("branch:" + branches.Peek());
-                Console.WriteLine("Size: " + size);
-                list.WriteAt(branches.Pop(), size);
+                for (int j = 0; j < branchesCount; j++)
+                {
+                    var branch = branches[j];
+                    if (branch.Key == block)
+                    {
+                        list.WriteAt(branch.Value.Pos, branch.Value.Size);
+                        continue;
+                    }
+                    branches[j] = new(branch.Key, (branch.Value.Pos, (Int16)(branch.Value.Size + size)));
+                }
+                branches.RemoveAll(branch => branch.Key == block);
             }
         }
 

@@ -12,21 +12,28 @@ namespace Compiler.ParseTree
         public List<IStatement> Statements { get; }
         public IExpr? LastExpr { get; }
 
-        public TypedExpr? ToAST()
+        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
-            foreach (var statement in Statements)
-            {
-                statement.ToAST();
-            }
+            var statements = Statements.Select(s => s.ToAST(func, globals, scopedSymbols)).ToList();
+
+            if (statements.Any(s => s == null))
+                return null;
 
             if (LastExpr == null)
-            {
-                return new TypedExpr(Type.Void, )
-            }
-            return LastExpr.ToAST();
+                return new AST.BlockExpr(new AST.Type.Void(), statements, null);
 
-            // ?int
-            // ?ref int
+            var lastExpr = LastExpr.ToAST(func, globals, scopedSymbols);
+            if (lastExpr == null)
+                return null;
+
+            return new AST.BlockExpr(lastExpr.Type, statements, lastExpr);
+        }
+
+        public BlockExpr(TextRange range, List<IStatement> statements, IExpr? lastExpr = null)
+        {
+            Range = range;
+            Statements = statements;
+            LastExpr = lastExpr;
         }
     }
 }

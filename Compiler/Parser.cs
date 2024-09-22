@@ -25,35 +25,151 @@ namespace Compiler
             }
         }
 
-        private Item ParsePrimary()
+        private BlockExpr ParseBlock()
+        {
+            var start = lexer.Token.Range.Start;
+            lexer.Consume();
+            var statements = new List<IStatement>();
+            IExpr? lastExpr = null;
+            while (lexer.Token.Type != TokenType.RCurly)
+            {
+                if (lastExpr != null)
+                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.RCurly });
+                var item = ParseItem();
+                switch (item)
+                {
+                    case Item { Expr: var expr, Statement: null }:
+                        if (lexer.Token.Type == TokenType.Semicolon)
+                        {
+                            statements.Add(new ExprStatement(new TextRange(expr!.Range.Start, lexer.Token.Range.End), expr));
+                            lexer.Consume();
+                            break;
+                        }
+
+                        if (expr!.IsBlock())
+                        {
+                            statements.Add(new ExprStatement(expr.Range, expr));
+                            break;
+                        }
+
+                        lastExpr = expr;
+                        break;
+                    case Item { Expr: null, Statement: var statement }:
+                        statements.Add(statement);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            var block = new BlockExpr(new TextRange(start, lexer.Token.Range.End), statements, lastExpr);
+            lexer.Consume();
+            return block;
+        }
+
+        private IfExpr ParseIf()
+        {
+            var start = lexer.Token.Range.Start;
+            lexer.Consume();
+
+            var condition = ParseExpr();
+
+            if (lexer.Token.Type != TokenType.LCurly)
+            {
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                throw new Exception(); // TODO: idk how to handle this
+            }
+
+            var then = ParseExpr();
+
+            if (lexer.Token.Type != TokenType.Else)
+                return new IfExpr(new TextRange(start, then.Range.End), condition, then);
+
+            lexer.Consume();
+            var @else = ParseExpr();
+
+            return new IfExpr(new TextRange(start, @else.Range.End), condition, then, @else);
+        }
+
+        private ReturnExpr ParseReturn()
+        {
+            var returnRange = lexer.Token.Range;
+            lexer.Consume();
+
+            if (lexer.Token.Type == TokenType.Semicolon)
+                return new ReturnExpr(returnRange, null);
+
+            var expr = ParseExpr();
+
+            return new ReturnExpr(new TextRange(returnRange.Start, expr.Range.End), expr);
+        }
+
+        private IExpr ParsePrimary()
         {
             switch (lexer.Token.Type)
             {
                 case TokenType.IntLiteral:
                     var intExpr = new IntExpr(lexer.Token.Range, int.Parse(lexer.Token.Content.ToString().Replace("_", "")));
                     lexer.Consume();
-                    return new Item(intExpr);
+                    return intExpr;
                 case TokenType.Identifier:
-                    return new Item(ParseIdentifier());
+                    return ParseIdentifier();
                 case TokenType.LParen:
+                {
+                    var start = lexer.Token.Range.Start;
                     lexer.Consume();
                     var expr = ParseExpr();
                     if (lexer.Token.Type != TokenType.RParen)
                         Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.RParen });
+                    var parenExpr = new ParenExpr(new TextRange(start, lexer.Token.Range.End), expr);
                     lexer.Consume();
-                    return new Item(expr);
+                    return parenExpr;
+                }
+                case TokenType.LCurly:
+                    return ParseBlock();
+                case TokenType.If:
+                    return ParseIf();
+                case TokenType.Return:
+                    return ParseReturn();
                 default:
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.IntLiteral, TokenType.Identifier, TokenType.LParen });
-                    return new Item(new IntLiteral(new TextRange(), 0));
+                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.IntLiteral, TokenType.Identifier, TokenType.LParen, TokenType.LCurly, TokenType.If, TokenType.Return });
+                    throw new Exception(); // TODO: idk how to handle this
             }
         }
 
-        private Item ParsePostfix()
+        private CallExpr ParseArgs(IExpr expr)
         {
-            return ParsePrimary();
+            lexer.Consume();
+            var args = new List<IExpr>();
+
+            while (lexer.Token.Type != TokenType.RParen)
+            {
+                args.Add(ParseExpr());
+                if (lexer.Token.Type is not TokenType.Comma and not TokenType.RParen)
+                {
+                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RParen });
+                    break;
+                }
+            }
+
+            var end = lexer.Token.Range.End;
+            lexer.Consume();
+            return new CallExpr(new TextRange(expr.Range.Start, end), expr, args);
         }
 
-        private Item ParseUnary()
+        private IExpr ParsePostfix(IExpr expr)
+        {
+            if (lexer.Token.Type == TokenType.LParen)
+                return ParsePostfix(ParseArgs(expr));
+
+            return expr;
+        }
+
+        private IExpr ParsePostfix()
+        {
+            return ParsePostfix(ParsePrimary());
+        }
+
+        private IExpr ParseUnary()
         {
             return ParsePostfix();
         }
@@ -64,11 +180,13 @@ namespace Compiler
             lexer.Consume();
             var identifier = ParseIdentifier();
 
-            if (lexer.Token.Type != TokenType.Colon)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Colon });
-            lexer.Consume();
+            ParseTree.Type? type = null;
+            if (lexer.Token.Type == TokenType.Colon)
+            {
+                lexer.Consume();
+                type = ParseType();
+            }
 
-            var type = ParseType();
             IExpr? value = null;
             if (lexer.Token.Type == TokenType.Assign)
             {
@@ -95,12 +213,20 @@ namespace Compiler
                 var opNode = BinOpNode.FromToken(lexer.Token);
                 if (opNode == null)
                     break;
+
+                lexer.Consume();
+                var opPrecedence = opNode.Value.Op.GetPrecedence();
+                if (opPrecedence < precedence)
+                    break;
+
+                var rhs = ParseExpr(precedence);
+                expr = new BinOpExpr(new TextRange(expr.Range.Start, rhs.Range.End), expr, opNode.Value, rhs);
             }
 
             return new Item(expr);
         }
 
-        private IExpr ParseExpr() => ParseItem() switch
+        private IExpr ParseExpr(int precedence = 1) => ParseItem(precedence) switch
         {
             Item { Expr: var expr, Statement: null } => expr!,
             _ => throw new NotImplementedException()
@@ -144,7 +270,7 @@ namespace Compiler
             while (lexer.Token.Type != TokenType.RParen)
             {
                 @params.Add(ParseParam());
-                if (lexer.Token.Type is not TokenType.Comma or TokenType.RParen)
+                if (lexer.Token.Type is not TokenType.Comma and not TokenType.RParen)
                 {
                     Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RParen });
                     break;
@@ -152,7 +278,7 @@ namespace Compiler
             }
             lexer.Consume(); // consume rparen
 
-            ParseTree.Type returnType = BuiltInTypes.Void;
+            ParseTree.Type? returnType = null;
             if (lexer.Token.Type == TokenType.RArrow)
             {
                 lexer.Consume();
@@ -162,13 +288,28 @@ namespace Compiler
             return new Proto(visibility, identifier, @params, returnType);
         }
 
-        private Func ParseFunc(VisibilityNode visibility)
+        private void ParseFunc(ModuleFile moduleFile, VisibilityNode visibility)
         {
             var proto = ParseProto(visibility);
             if (lexer.Token.Type != TokenType.LCurly)
                 Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
             var body = ParseExpr();
-            return new Func(proto, body);
+            moduleFile.Funcs.Add(proto.Identifier.Name, new Func(moduleFile, proto, body));
+        }
+
+        public void ParseTypeDecl(ModuleFile moduleFile, VisibilityNode visibility)
+        {
+            lexer.Consume(); // consume type
+            var identifier = ParseIdentifier();
+            if (lexer.Token.Type != TokenType.Assign)
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Assign });
+            lexer.Consume();
+            var type = ParseType();
+            if (lexer.Token.Type != TokenType.Semicolon)
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Semicolon });
+            lexer.Consume();
+
+            moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, identifier, type));
         }
 
         private VisibilityNode ParseVisiblity()
@@ -183,12 +324,34 @@ namespace Compiler
             return new VisibilityNode(new TextRange(), Visibility.Priv);
         }
 
-        public Module Parse(Lexer lexer)
+        public Module Parse(Project project, Lexer lexer)
         {
+
+            this.project = project;
             this.lexer = lexer;
+
+            project.Files.Add(lexer.FileName, lexer.Input);
+
             lexer.Consume();
 
-            var module = new Module();
+            if (lexer.Token.Type != TokenType.Mod)
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Mod });
+            lexer.Consume();
+
+            var identifer = ParseIdentifier();
+            if (lexer.Token.Type != TokenType.Semicolon)
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Semicolon });
+            lexer.Consume();
+
+            if (!project.Modules.TryGetValue(identifer.Name, out var module))
+            {
+                module = new Module(project, identifer.Name);
+                project.Modules.Add(identifer.Name, module);
+            }
+
+            var moduleFile = new ModuleFile(module, lexer.FileName);
+            module.ModuleFiles.Add(moduleFile);
+
 
             while (lexer.Token.Type != TokenType.Unknown)
             {
@@ -196,7 +359,10 @@ namespace Compiler
                 switch (lexer.Token.Type)
                 {
                     case TokenType.Fn:
-                        module.Funcs.Add(ParseFunc(visiblity));
+                        ParseFunc(moduleFile, visiblity);
+                        break;
+                    case TokenType.Type:
+                        ParseTypeDecl(moduleFile, visiblity);
                         break;
                     default:
                         Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Fn });
@@ -213,8 +379,10 @@ namespace Compiler
         public Parser()
         {
             lexer = new Lexer("", "");
+            project = new Project();
         }
 
+        private Project project;
         private Lexer lexer;
     }
 }

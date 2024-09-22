@@ -17,6 +17,6 @@ namespace Compiler.ParseTree
             Expr = expr;
         }
 
-        public TypedExpr? ToAST() => Expr.ToAST();
+        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false) => Expr.ToAST(func, globals, scopedSymbols);
     }
 }

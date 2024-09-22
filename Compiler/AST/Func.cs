@@ -8,35 +8,27 @@ namespace Compiler.AST
 {
     public class Func
     {
-        public Type ReturnType { get; set; }
-        public List<VarDeclStatement> Params { get; set; } = new();
-        public IExpr Body { get; set; }
+        public Proto Proto { get; set; }
+        public IExpr? Body { get; set; }
 
         public ByteCode.Func CodeGen(Dictionary<Func, int> funcIds)
         {
-            var func = new ByteCode.Func(Params.Count, 0);
+            var func = new ByteCode.Func(Proto.Params.Count, 0);
             var symbols = new CodeGenSymbols();
-            foreach (var param in Params)
+            foreach (var param in Proto.Params)
             {
                 symbols.AddVar(param);
                 func.LocalsCount++;
             }
 
             func.AddBlock();
-            Body.CodeGen(func, funcIds, symbols);
+            Body!.CodeGen(func, funcIds, symbols);
             return func;
         }
 
-        public Func(Type returnType, IExpr body, List<VarDeclStatement> @params)
+        public Func(Proto proto, IExpr? body)
         {
-            ReturnType = returnType;
-            Body = body;
-            Params = @params;
-        }
-
-        public Func(Type returnType, IExpr body)
-        {
-            ReturnType = returnType;
+            Proto = proto;
             Body = body;
         }
     }

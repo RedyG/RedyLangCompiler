@@ -8,6 +8,9 @@ namespace Compiler.ParseTree
 {
     public interface IExpr : INode
     {
-        public TypedExpr? ToAST();
+        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false); // func only for the moment
+
+        public bool IsBlock() => this is BlockExpr _ or IfExpr _;
+
     }
 }

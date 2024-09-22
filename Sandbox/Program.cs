@@ -108,4 +108,15 @@ File.WriteAllBytes("testAST.redy", list.ToArray());*/
 
 
 var parser = new Parser();
-parser.Parse(new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\TextFile1.txt"));
+var project = new Project();
+parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\program.redy"));
+var modules = project.ToAST();
+if (Logger.CompilationFailed)
+    return;
+modules.ForEach(module =>
+{
+    var byteModule = module.CodeGen();
+    var list = new Compiler.ByteCode.ByteList();
+    byteModule.WriteTo(list);
+    File.WriteAllBytes("program.rasm", list.ToArray());
+});

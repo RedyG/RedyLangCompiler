@@ -8,6 +8,13 @@ namespace Compiler.AST
 {
     public class Field
     {
+        public string Name { get; set; }
         public Type Type { get; set; }
+
+        public Field(string name, Type type)
+        {
+            Name = name;
+            Type = type;
+        }
     }
 }

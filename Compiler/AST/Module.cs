@@ -24,5 +24,10 @@ namespace Compiler.AST
 
             return module;
         }
+
+        public Module(List<Func> funcs)
+        {
+            Funcs = funcs;
+        }
     }
 }
