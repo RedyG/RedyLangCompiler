@@ -115,15 +115,23 @@ namespace Compiler.ByteCode
     {
         [FieldOffset(0)] public readonly OpCode OpCode;
 
+        [FieldOffset(8)] public readonly Func func;
         [FieldOffset(8)] public readonly sbyte i8;
         [FieldOffset(8)] public readonly Int16 i16;
         [FieldOffset(8)] public readonly Int32 i32;
         [FieldOffset(8)] public readonly Int64 i64;
         [FieldOffset(8)] public readonly UInt16 u16;
 
+
         public Instruction(OpCode opCode)
         {
             OpCode = opCode;
+        }
+
+        public Instruction(OpCode opCode, Func func)
+        {
+            OpCode = opCode;
+            this.func = func;
         }
 
         private Instruction(OpCode opCode, sbyte i8)
@@ -156,7 +164,7 @@ namespace Compiler.ByteCode
             this.u16 = u16;
         }
 
-        public static Instruction CreateCall(UInt16 id) => new Instruction(OpCode.Call, id);
+        public static Instruction CreateCall(Func func) => new Instruction(OpCode.Call, func);
         public static Instruction CreateLocalGet(UInt16 id) => new Instruction(OpCode.LocalGet, id);
         public static Instruction CreateLocalSet(UInt16 id) => new Instruction(OpCode.LocalSet, id);
         public static Instruction CreateI8Const(sbyte value) => new Instruction(OpCode.I8Const, value);

@@ -145,12 +145,12 @@ namespace Compiler
 
         public static void ValueNotFoundInScope(ModuleFile moduleFile, Identifier identifier)
         {
-            Error(new Log(moduleFile, $"cannot find value `{identifier}` in this scope", new(identifier.Range)));
+            Error(new Log(moduleFile, $"cannot find value `{identifier.Name}` in this scope", new(identifier.Range)));
         }
 
         public static void FuncNotFound(ModuleFile moduleFile, Identifier identifier)
         {
-            Error(new Log(moduleFile, $"cannot find function `{identifier}` in this scope", new(identifier.Range)));
+            Error(new Log(moduleFile, $"cannot find function `{identifier.Name}` in this scope", new(identifier.Range)));
         }
 
         public static void FuncPrivate(ModuleFile moduleFile, Identifier identifier, Func func)
@@ -159,7 +159,7 @@ namespace Compiler
                 new List<Underline> { new(func.Proto.Identifier.Range, "consider adding `pub`") }
                 : null;
 
-            Error(new Log(moduleFile, $"function `{identifier}` is private", new(identifier.Range), hints));
+            Error(new Log(moduleFile, $"function `{identifier.Name}` is private", new(identifier.Range), hints));
         }
 
         public static void TypePrivate(ModuleFile moduleFile, Identifier identifier, TypeDecl typeDecl)
@@ -168,7 +168,7 @@ namespace Compiler
                 new List<Underline> { new(typeDecl.Identifier.Range, "consider adding `pub`") }
                 : null;
 
-            Error(new Log(moduleFile, $"type `{identifier}` is private", new(identifier.Range), hints));
+            Error(new Log(moduleFile, $"type `{identifier.Name}` is private", new(identifier.Range), hints));
         }
 
         public static void InvalidArgsCount(ModuleFile moduleFile, int paramsCount, CallExpr callExpr)

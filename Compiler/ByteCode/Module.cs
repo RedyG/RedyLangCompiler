@@ -6,15 +6,30 @@ using System.Threading.Tasks;
 
 namespace Compiler.ByteCode
 {
+    public struct ImportedFunc
+    {
+        public string FileName { get; set; }
+
+    }
+
     public class Module
     {
+        public List<string> ImportedFuncs { get; } = new();
         public List<Func> Funcs { get; } = new();
 
         public void WriteTo(ByteList list)
         {
             list.Add("redylang"); // magic number
             list.Add((Int64)0); // version
-            list.Add((Int16)Funcs.Count);
+
+            list.Add((UInt16)Funcs.Count);
+            list.Add((UInt16)ImportedFuncs.Count);
+
+            foreach (var func in ImportedFuncs)
+            {
+                list.Add(func + "\0");
+            }
+
             list.AdvanceBy(Funcs.Count * 8);
 
             int funcOffset = 0;
@@ -32,6 +47,17 @@ namespace Compiler.ByteCode
                 funcOffset += (list.Count - count);
             }
 
+        }
+
+        public Module(List<string> importedFuncs)
+        {
+            ImportedFuncs = importedFuncs;
+        }
+
+        public Module(List<Func> funcs, List<string> importedFuncs)
+        {
+            Funcs = funcs;
+            ImportedFuncs = importedFuncs;
         }
     }
 }

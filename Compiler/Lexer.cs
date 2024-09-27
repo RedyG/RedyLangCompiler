@@ -15,6 +15,7 @@ namespace Compiler
         // Keywords
         Pub,
         Type,
+        Use,
         Mod,
         Fn,
         If,
@@ -31,6 +32,7 @@ namespace Compiler
         Semicolon,
         Colon,
         Comma,
+        DoubleColon,
 
         // Operators
         Mul,
@@ -54,6 +56,7 @@ namespace Compiler
         {
             TokenType.Fn => true,
             TokenType.Type => true,
+            TokenType.Use => true,
             _ => false,
         };
 
@@ -62,6 +65,7 @@ namespace Compiler
             TokenType.Unknown => "Unknown",
             TokenType.Pub => "pub",
             TokenType.Type => "type",
+            TokenType.Use => "use",
             TokenType.Mod => "mod",
             TokenType.Fn => "fn",
             TokenType.If => "if",
@@ -76,6 +80,7 @@ namespace Compiler
             TokenType.Semicolon => ";",
             TokenType.Colon => ":",
             TokenType.Comma => ",",
+            TokenType.DoubleColon => "::",
             TokenType.Mul => "*",
             TokenType.Div => "/",
             TokenType.Add => "+",
@@ -208,6 +213,8 @@ namespace Compiler
 
             if (trimmedInput.StartsWith("->", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.RArrow, _token.Range.End);
+            if (trimmedInput.StartsWith("::", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.DoubleColon, _token.Range.End);
 
             switch (trimmedInput[0])
             {
@@ -245,6 +252,8 @@ namespace Compiler
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Pub, _token.Range.End);
             if (trimmedInput.StartsWith("type", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Type, _token.Range.End);
+            if (trimmedInput.StartsWith("use", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Use, _token.Range.End);
             if (trimmedInput.StartsWith("mod", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Mod, _token.Range.End);
             if (trimmedInput.StartsWith("if", StringComparison.CurrentCulture))

@@ -32,7 +32,7 @@ namespace Compiler.ParseTree
                 if (fileModule.Funcs.TryGetValue(identifier.Name, out var func))
                     return func;
 
-                if (fileModule.ImportedFuncs.TryGetValue(identifier.Name, out func))
+                if (fileModule.UsedFuncs.TryGetValue(identifier.Name, out func))
                 {
                      if (func.Proto.VisibilityNode.Visibility == Visibility.Pub)
                         return func;
@@ -44,7 +44,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                foreach (var module in fileModule.ImportedModules.Values)
+                foreach (var module in fileModule.UsedModules.Values)
                 {
                     func = module.GetPubFunc(identifier, false);
                     if (func != null)
@@ -70,7 +70,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                if (moduleFile.ImportedFuncs.TryGetValue(identifier.Name, out func))
+                if (moduleFile.UsedFuncs.TryGetValue(identifier.Name, out func))
                 {
                     if (func.Proto.VisibilityNode.Visibility == Visibility.Pub)
                         return func;
@@ -82,7 +82,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                foreach (var module in moduleFile.ImportedModules.Values)
+                foreach (var module in moduleFile.UsedModules.Values)
                 {
                     func = module.GetPubFunc(identifier, false);
                     if (func != null)
@@ -101,7 +101,7 @@ namespace Compiler.ParseTree
                 if (moduleFile.TypeDecls.TryGetValue(identifier.Name, out var typeDecl))
                     return typeDecl.Type;
 
-                if (moduleFile.ImportedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
+                if (moduleFile.UsedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
                 {
                     if (typeDecl.VisibilityNode.Visibility == Visibility.Pub)
                         return typeDecl.Type;
@@ -113,7 +113,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                foreach (var module in moduleFile.ImportedModules.Values)
+                foreach (var module in moduleFile.UsedModules.Values)
                 {
                     var type = module.GetPubType(identifier, false);
                     if (type != null)
@@ -140,7 +140,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                if (moduleFile.ImportedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
+                if (moduleFile.UsedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
                 {
                     if (typeDecl.VisibilityNode.Visibility == Visibility.Pub)
                         return typeDecl.Type;
@@ -152,7 +152,7 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                foreach (var module in moduleFile.ImportedModules.Values)
+                foreach (var module in moduleFile.UsedModules.Values)
                 {
                     var type = module.GetPubType(identifier, false);
                     if (type != null)
@@ -163,22 +163,6 @@ namespace Compiler.ParseTree
             return null;
         }
 
-
-        public AST.Module ToAST(GlobalSymbols globals)
-        {
-            List<AST.Func> funcs = new();
-            foreach (var moduleFile in ModuleFiles)
-            {
-                foreach (var func in moduleFile.Funcs.Values)
-                {
-                    var funcAST = func?.ToAST(globals);
-                    if (funcAST != null)
-                        funcs.Add(funcAST);
-                }
-            }
-
-            return new AST.Module(funcs);
-        }
 
     }
 }

@@ -312,6 +312,50 @@ namespace Compiler
             moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, identifier, type));
         }
 
+        // parse syntax like this:
+        // use std::io::name::test;
+        // use std::collections::{List, HashMap};
+        // and add the UseDecl class to the list UseDecls in moduleFile
+        public void ParseUse(ModuleFile moduleFile, VisibilityNode visibilityNode)
+        {
+            lexer.Consume(); // consume use
+            var start = lexer.Token.Range.Start;
+            var path = new List<Identifier>();
+            var imported = new List<Identifier>();
+            while (true)
+            {
+                path.Add(ParseIdentifier());
+                if (lexer.Token.Type != TokenType.DoubleColon)
+                    break;
+                lexer.Consume();
+            }
+
+            if (lexer.Token.Type == TokenType.LCurly)
+            {
+                lexer.Consume();
+                while (lexer.Token.Type != TokenType.RCurly)
+                {
+                    imported.Add(ParseIdentifier());
+                    if (lexer.Token.Type is not TokenType.Comma and not TokenType.RCurly)
+                    {
+                        Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RCurly });
+                        break;
+                    }
+                }
+                lexer.Consume();
+            }
+            else
+            {
+                imported.Add(path.Pop());
+            }
+
+            if (lexer.Token.Type != TokenType.Semicolon)
+                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Semicolon });
+            lexer.Consume();
+
+            moduleFile.UseDecls.Add(new UseDecl(visibilityNode, moduleFile, path, imported));
+        }
+
         private VisibilityNode ParseVisiblity()
         {
             if (lexer.Token.Type == TokenType.Pub)
@@ -363,6 +407,9 @@ namespace Compiler
                         break;
                     case TokenType.Type:
                         ParseTypeDecl(moduleFile, visiblity);
+                        break;
+                    case TokenType.Use:
+                        ParseUse(moduleFile, visiblity);
                         break;
                     default:
                         Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Fn });

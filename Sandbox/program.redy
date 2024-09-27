@@ -1,7 +1,5 @@
 ﻿mod test;
 
-use fib::fib;
-
 fn main() {
     var res = fib(10);
     res

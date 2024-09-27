@@ -108,10 +108,11 @@ File.WriteAllBytes("testAST.redy", list.ToArray());*/
 
 
 var parser = new Parser();
-var project = new Project();
+var project = new Compiler.ParseTree.Project();
 parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\program.redy"));
+parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\fib.redy"));
 var modules = project.ToAST();
-if (Logger.CompilationFailed)
+if (Logger.CompilationFailed || modules == null)
     return;
 modules.ForEach(module =>
 {

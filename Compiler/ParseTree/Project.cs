@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Compiler
+namespace Compiler.ParseTree
 {
     public class Project
     {
@@ -18,9 +18,12 @@ namespace Compiler
             var globals = new ParseTree.GlobalSymbols();
             foreach (var module in Modules.Values)
             {
-                var moduleAST = module?.ToAST(globals);
-                if (moduleAST != null)
-                    modules.Add(moduleAST);
+                foreach (var moduleFile in module.ModuleFiles)
+                {
+                    var moduleAST = moduleFile?.ToAST(globals);
+                    if (moduleAST != null)
+                        modules.Add(moduleAST);
+                }
             }
 
             return modules;
