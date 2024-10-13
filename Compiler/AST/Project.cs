@@ -8,7 +8,7 @@ namespace Compiler.AST
 {
     public class Project
     {
-        public List<Module> Modules { get; } = new();
+        public List<ModuleFile> Modules { get; } = new();
 
         public Project()
         {

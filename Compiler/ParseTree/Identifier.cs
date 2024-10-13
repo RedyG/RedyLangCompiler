@@ -26,7 +26,7 @@ namespace Compiler.ParseTree
             }
             else
             {
-                Logger.ValueNotFoundInScope(func.ModuleFile, this);
+                Logger.ValueNotFoundInScope(func.Proto.ModuleFile, this);
                 return null;
             }
 

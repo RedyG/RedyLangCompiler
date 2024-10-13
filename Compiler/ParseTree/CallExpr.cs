@@ -23,16 +23,16 @@ namespace Compiler.ParseTree
         {
             if (Callee is Identifier identifier)
             {
-                var callee = func.ModuleFile.Module.GetFunc(identifier);
+                var callee = func.Proto.ModuleFile.Module.GetFunc(identifier);
                 if (callee == null)
                 {
-                    Logger.FuncNotFound(func.ModuleFile, identifier);
+                    Logger.FuncNotFound(func.Proto.ModuleFile, identifier);
                     return null;
                 }
 
                 if (callee.Proto.Params.Count != Args.Count)
                 {
-                    Logger.InvalidArgsCount(func.ModuleFile, callee.Proto.Params.Count, this);
+                    Logger.InvalidArgsCount(func.Proto.ModuleFile, callee.Proto.Params.Count, this);
                     return null;
                 }
 

@@ -1,6 +1,21 @@
-﻿mod test;
+mod test;
+use fib::fib;
+
+type Human = struct {
+	age: i32,
+	height: i32
+};
+
+type Person = trait {
+	fn age(self) -> i32;
+};
+
+impl Person for Human {
+	fn age(self) -> i32 {
+		self.age
+	}
+}
 
 fn main() {
-    var res = fib(10);
-    res
+    Human { age: 10, height: 200 }.age()
 }

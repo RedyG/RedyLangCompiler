@@ -19,11 +19,11 @@ namespace Compiler.AST
             Args = args;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             foreach (var arg in Args)
-                arg.CodeGen(func, funcIds, symbols);
-            func.LastBlock.Instructions.Add(Instruction.CreateCall((UInt16)funcIds[Func]));
+                arg.CodeGen(func, funcs, symbols);
+            func.LastBlock.Instructions.Add(Instruction.CreateCall(Func.CodeGen(funcs)));
         }
     }
 }

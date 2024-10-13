@@ -8,6 +8,7 @@ namespace Compiler.AST
 {
     public class Proto
     {
+        public ModuleFile? Module { get; set; }
         public Type ReturnType { get; set; }
         public List<VarDeclStatement> Params { get; set; } = new();
 
@@ -16,10 +17,11 @@ namespace Compiler.AST
             ReturnType = returnType;
         }
 
-        public Proto(Type returnType, List<VarDeclStatement> @params)
+        public Proto(Type returnType, List<VarDeclStatement> @params, ModuleFile? module = null)
         {
             ReturnType = returnType;
             Params = @params;
+            Module = module;
         }
     }
 }

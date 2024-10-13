@@ -10,20 +10,23 @@ namespace Compiler.ParseTree
 {
     public record Type
     {
-        public record Struct(List<Field> fields, TextRange Range) : Type;
+        public record Struct(List<Field> Fields, TextRange Range) : Type;
         public record Identifier(ParseTree.Identifier Identifer) : Type;
+        public record Trait(List<Func> Funcs, List<Proto> Protos, TextRange Range) : Type;
 
         public AST.Type? ToAST(Module module)
         {
             switch (this)
             {
                 case Struct @struct:
-                    var fields = @struct.fields.Select(f => new AST.Field(f.VarDecl.Identifier.Name.ToString(), f.VarDecl.Type.ToAST(module))).ToList();
+                    var structAST = new AST.Type.Struct();
+                    var fields = @struct.fields.Select(f => new AST.Field(f.VarDecl.Identifier.Name.ToString(), f.VarDecl.Type.ToAST(module), structAST)).ToList();
 
-                    if (fields.Any(f => f.Type == null))
+                    if (Enumerable.Any<AST.Field>(fields, (Func<AST.Field, bool>)(f => f.Type == null)))
                         return null;
 
-                    return new AST.Type.Struct(fields);
+                    structAST.Fields = fields;
+                    return structAST;
                 case Identifier identifier:
                     switch (identifier.Identifer.Name.ToString())
                     {
@@ -45,6 +48,7 @@ namespace Compiler.ParseTree
         {
             Struct s => s.Range,
             Identifier i => i.Identifer.Range,
+            Trait t => t.Range,
             _ => throw new NotImplementedException()
         };
     }

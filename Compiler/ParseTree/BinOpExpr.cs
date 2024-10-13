@@ -31,6 +31,30 @@ namespace Compiler.ParseTree
 
         public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
+            if (OpNode.Op == BinOp.Access)
+            {
+                var leftExpr = Left.ToAST(func, globals, scopedSymbols);
+                if (leftExpr == null)
+                    return null;
+
+
+                if (Right is Identifier identifier) {
+                    if (leftExpr.Type is AST.Type.Struct @struct)
+                    {
+                        var field = @struct.Fields.FirstOrDefault(f => f.Name == identifier.Name);
+                        if (field == null)
+                        {
+                            Logger.InvalidStructField(func.Proto.ModuleFile, @struct, identifier);
+                            return null;
+                        }
+
+                        return new AST.AccessExpr(leftExpr, field);
+                    }
+                }
+
+                return null; // TODO: error this, just lazy rn
+            }
+
             var left = Left.ToAST(func, globals, scopedSymbols);
             var right = Right.ToAST(func, globals, scopedSymbols);
 
@@ -39,7 +63,7 @@ namespace Compiler.ParseTree
 
             if (left.Type != right.Type)
             {
-                Logger.MismatchedTypesOp(func.ModuleFile, left.Type, right.Type, OpNode);
+                Logger.MismatchedTypesOp(func.Proto.ModuleFile, left.Type, right.Type, OpNode);
                 return null;
             }
 

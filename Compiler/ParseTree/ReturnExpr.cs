@@ -28,7 +28,7 @@ namespace Compiler.ParseTree
             {
                 if (funcAST.Proto.ReturnType is not AST.Type.Void)
                 {
-                    Logger.MismatchedTypesReturnVoid(func.ModuleFile, func, funcAST.Proto.ReturnType, this);
+                    Logger.MismatchedTypesReturnVoid(func.Proto.ModuleFile, func, funcAST.Proto.ReturnType, this);
                     return null;
                 }
                     

@@ -18,7 +18,7 @@ namespace Compiler.AST
         }
 
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)symbols.VarIds[Var]));
         }

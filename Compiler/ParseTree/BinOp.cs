@@ -8,6 +8,7 @@ namespace Compiler.ParseTree
 {
     public enum BinOp
     {
+        Access,
         Mul,
         Div,
         Add,
@@ -27,22 +28,9 @@ namespace Compiler.ParseTree
             _ => true,
         };
 
-        public static AST.Type GetType(this BinOp binOp) => binOp switch
-        {
-            BinOp.Mul => new AST.Type.I32(),
-            BinOp.Div => new AST.Type.I32(),
-            BinOp.Add => new AST.Type.I32(),
-            BinOp.Sub => new AST.Type.I32(),
-            BinOp.Lt => new AST.Type.Bool(),
-            BinOp.Le => new AST.Type.Bool(),
-            BinOp.Gt => new AST.Type.Bool(),
-            BinOp.Ge => new AST.Type.Bool(),
-            BinOp.Assign => new AST.Type.Void(),
-            _ => throw new NotImplementedException(),
-        };
-
         public static int GetPrecedence(this BinOp binOp) => binOp switch
         {
+            BinOp.Access => 5,
             BinOp.Mul => 4,
             BinOp.Div => 4,
             BinOp.Add => 3,
@@ -57,6 +45,7 @@ namespace Compiler.ParseTree
 
         public static string ToSentenceFormat(this BinOp binOp) => binOp switch
         {
+            BinOp.Access => "access",
             BinOp.Mul => "multiply",
             BinOp.Div => "divide",
             BinOp.Add => "add",
@@ -73,6 +62,7 @@ namespace Compiler.ParseTree
     {
         private static BinOp? GetBinOp(TokenType type) => type switch
         {
+            TokenType.Dot => BinOp.Access,
             TokenType.Add => BinOp.Add,
             TokenType.Sub => BinOp.Sub,
             TokenType.Lt => BinOp.Lt,

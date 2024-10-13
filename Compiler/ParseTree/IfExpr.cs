@@ -31,7 +31,7 @@ namespace Compiler.ParseTree
                 failed = true;
             else if (condition.Type is not AST.Type.Bool)
             {
-                Logger.MismatchedTypesIf(func.ModuleFile, condition.Type, this);
+                Logger.MismatchedTypesIf(func.Proto.ModuleFile, condition.Type, this);
                 failed = true;
             }
 
@@ -43,7 +43,7 @@ namespace Compiler.ParseTree
             {
                 if (then != null && !then.Type.IsEmpty)
                 {
-                    Logger.MismatchedTypesNoElse(func.ModuleFile, then.Type, this);
+                    Logger.MismatchedTypesNoElse(func.Proto.ModuleFile, then.Type, this);
                     failed = true;
                 }
                 if (failed)
@@ -58,7 +58,7 @@ namespace Compiler.ParseTree
 
             if (then!.Type != @else.Type)
             {
-                Logger.MismatchedTypesIfElse(func.ModuleFile, then.Type, @else.Type, this);
+                Logger.MismatchedTypesIfElse(func.Proto.ModuleFile, then.Type, @else.Type, this);
                 return null;
             }
 

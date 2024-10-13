@@ -10,6 +10,6 @@ namespace Compiler.AST
     public interface IExpr
     {
         public Type Type { get; }
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols);
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols);
     }
 }

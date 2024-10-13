@@ -27,7 +27,7 @@ namespace Compiler.ParseTree
             AST.Type? type = null;
             if (Type != null)
             {
-                type = Type.ToAST(func.ModuleFile.Module);
+                type = Type.ToAST(func.Proto.ModuleFile.Module);
                 if (type == null)
                     return null;
             }
@@ -44,14 +44,14 @@ namespace Compiler.ParseTree
 
                 if (type != value.Type)
                 {
-                    Logger.MismatchedTypesVarDecl(func.ModuleFile, type, value.Type, this);
+                    Logger.MismatchedTypesVarDecl(func.Proto.ModuleFile, type, value.Type, this);
                     return null;
                 }
             }
 
             if (type == null)
             {
-                Logger.ExpectedTypeOrValueVarDecl(func.ModuleFile, this);
+                Logger.ExpectedTypeOrValueVarDecl(func.Proto.ModuleFile, this);
                 return null;
             }
 

@@ -19,12 +19,12 @@ namespace Compiler.AST
             LastExpr = lastExpr;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             foreach (var statement in Statements)
-                statement.CodeGen(func, funcIds, symbols);
+                statement.CodeGen(func, funcs, symbols);
 
-            LastExpr?.CodeGen(func, funcIds, symbols);
+            LastExpr?.CodeGen(func, funcs, symbols);
         }
     }
 }

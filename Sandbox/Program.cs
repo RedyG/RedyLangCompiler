@@ -1,5 +1,6 @@
 ﻿using Compiler;
 using Compiler.AST;
+using System;
 /*Module module = new();
 var main = new Func(0, 0, new List<Block> {
     new Block(
@@ -114,10 +115,12 @@ parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompil
 var modules = project.ToAST();
 if (Logger.CompilationFailed || modules == null)
     return;
-modules.ForEach(module =>
+
+var funcSymbols = new Dictionary<Func, Compiler.ByteCode.Func>();
+var byteModules = modules.Select(module => module.CodeGen(funcSymbols)).ToList();
+foreach (var byteModule in byteModules)
 {
-    var byteModule = module.CodeGen();
     var list = new Compiler.ByteCode.ByteList();
     byteModule.WriteTo(list);
-    File.WriteAllBytes("program.rasm", list.ToArray());
-});
+    File.WriteAllBytes($@"C:\Users\minio\OneDrive\Bureau\redy_test\{Path.GetFileNameWithoutExtension(byteModule.FileName)}.rasm", list.ToArray());
+}

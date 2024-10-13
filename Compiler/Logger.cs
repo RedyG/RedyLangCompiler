@@ -155,7 +155,7 @@ namespace Compiler
 
         public static void FuncPrivate(ModuleFile moduleFile, Identifier identifier, Func func)
         {
-            var hints = func.ModuleFile.Module.Project == moduleFile.Module.Project ?
+            var hints = func.Proto.ModuleFile.Module.Project == moduleFile.Module.Project ?
                 new List<Underline> { new(func.Proto.Identifier.Range, "consider adding `pub`") }
                 : null;
 
@@ -179,6 +179,11 @@ namespace Compiler
         public static void ExpectedTypeOrValueVarDecl(ModuleFile moduleFile, VarDeclStatement varDecl)
         {
             Error(new Log(moduleFile, "expected type or value", new(varDecl.Range, "expected either a type or a value, found neither")));
+        }
+
+        public static void InvalidStructField(ModuleFile moduleFile, AST.Type type, Identifier fieldIdentifier)
+        {
+            Error(new Log(moduleFile, $"invalid field `{fieldIdentifier.Name}`", new(fieldIdentifier.Range, $"field `{fieldIdentifier.Name}` does not exist in the struct `{type}`")));
         }
     }
 }

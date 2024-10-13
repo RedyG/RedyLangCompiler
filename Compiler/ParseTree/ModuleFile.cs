@@ -28,37 +28,36 @@ namespace Compiler.ParseTree
         {
             if (resolved)
                 return;
+
+            foreach (var useDecl in UseDecls)
+            {
+                var module = Module.Project.Modules[useDecl.Path[0].Name];
+
+                foreach (var import in useDecl.Imported)
+                {
+                    var func = module.GetPubFunc(import);
+                    if (func != null)
+                    {
+                        UsedFuncs.Add(import.Name, func);
+                        continue;
+                    }
+                }
+            }
+
             resolved = true;
         }
 
-        public AST.Module ToAST(GlobalSymbols globals)
-        {
-            List<ImportedFunc> importedFuncs = new();
-            List<AST.Func> funcs = new();
+        private static List<AST.Func> ToAST(Dictionary<StringSegment, Func> funcs, GlobalSymbols globals) => funcs.Values
+            .Select(func => func.ToAST(globals))
+            .Where(func => func != null)
+            .ToList()!;
 
-            foreach (var func in UsedFuncs.Values)
-            {
-                if (func == null)
-                    continue;
+        private List<AST.Type> ToAST(Dictionary<StringSegment, TypeDecl> typeDecls, GlobalSymbols globals) => typeDecls.Values
+            .Select(typeDecl => typeDecl.Type.ToAST(Module))
+            .Where(typeDecl => typeDecl != null)
+            .ToList()!;
 
-                var funcAST = func.ToAST(globals);
-                if (funcAST != null)
-                    importedFuncs.Add(new ImportedFunc(func.ModuleFile.FileName, funcAST));
-            }
-
-
-
-            foreach (var func in Funcs.Values)
-            {
-                var funcAST = func?.ToAST(globals);
-                if (funcAST != null)
-                    funcs.Add(funcAST);
-            }
-
-
-
-            return new AST.Module(funcs);
-        }
+        public AST.ModuleFile ToAST(GlobalSymbols globals) => new AST.ModuleFile(FileName, ToAST(Funcs, globals), ToAST(UsedFuncs, globals), ToAST(TypeDecls, globals));
 
 
         public ModuleFile(Module module, string fileName)

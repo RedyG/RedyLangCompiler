@@ -12,12 +12,15 @@ namespace Compiler.ParseTree
         public Dictionary<StringSegment, ParseTree.Module> Modules { get; } = new();
         public Dictionary<string, string> Files { get; } = new();
 
-        public List<AST.Module>? ToAST()
+        public List<AST.ModuleFile>? ToAST()
         {
-            List<AST.Module> modules = new();
+            List<AST.ModuleFile> modules = new();
             var globals = new ParseTree.GlobalSymbols();
             foreach (var module in Modules.Values)
             {
+                foreach (var moduleFile in module.ModuleFiles)
+                    moduleFile.ResolveUseDecls();
+
                 foreach (var moduleFile in module.ModuleFiles)
                 {
                     var moduleAST = moduleFile?.ToAST(globals);

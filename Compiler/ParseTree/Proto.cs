@@ -8,17 +8,19 @@ namespace Compiler.ParseTree
 {
     public class Proto
     {
+        public ModuleFile ModuleFile { get; }
         public VisibilityNode VisibilityNode { get; }
         public Type? ReturnType { get; }
         public Identifier Identifier { get; }
         public List<VarDeclStatement> Params { get; }
 
-        public Proto(VisibilityNode visibilityNode, Identifier identifier, List<VarDeclStatement> @params, Type? returnType)
+        public Proto( VisibilityNode visibilityNode, Identifier identifier, List<VarDeclStatement> @params, Type? returnType, ModuleFile moduleFile)
         {
             VisibilityNode = visibilityNode;
             ReturnType = returnType;
             Identifier = identifier;
             Params = @params;
+            ModuleFile = moduleFile;
         }
 
         public AST.Proto? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols)
@@ -31,7 +33,7 @@ namespace Compiler.ParseTree
             if (ReturnType == null)
                 return new AST.Proto(new AST.Type.Void(), @params);
 
-            var returnType = ReturnType.ToAST(func.ModuleFile.Module);
+            var returnType = ReturnType.ToAST(func.Proto.ModuleFile.Module);
             if (returnType == null)
                 return null;
             

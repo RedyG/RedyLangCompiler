@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace Compiler.ByteCode
 {
-    public struct ImportedFunc
-    {
-        public string FileName { get; set; }
-
-    }
-
     public class Module
     {
-        public List<string> ImportedFuncs { get; } = new();
+        public string FileName { get; set; }
+        public List<Func> ImportedFuncs { get; } = new();
         public List<Func> Funcs { get; } = new();
 
         public void WriteTo(ByteList list)
@@ -22,40 +17,61 @@ namespace Compiler.ByteCode
             list.Add("redylang"); // magic number
             list.Add((Int64)0); // version
 
-            list.Add((UInt16)Funcs.Count);
             list.Add((UInt16)ImportedFuncs.Count);
+            list.Add((UInt16)Funcs.Count);
 
             foreach (var func in ImportedFuncs)
             {
-                list.Add(func + "\0");
+                list.Add((UInt16)func.GetId());
+                list.Add(Path.GetFileNameWithoutExtension(func.Module!.FileName) + "\0"); // TODO: nested not just file name
             }
 
-            list.AdvanceBy(Funcs.Count * 8);
+            int funcsStart = list.Count;
+
+            list.AdvanceBy(Funcs.Count * 12);
 
             int funcOffset = 0;
 
             for (int i = 0; i < Funcs.Count; i++)
             {
                 var func = Funcs[i];
-                int start = i * 8 + 18;
+                int start = i * 8 + funcsStart;
+
                 list.WriteAt(start, (UInt16)func.ParamsCount);
                 list.WriteAt(start + 2, (UInt16)func.LocalsCount);
-                list.WriteAt(start + 4, funcOffset);
+                list.WriteAt(start + 8, (UInt32)funcOffset);
 
-                int count = list.Count;
-                func.WriteTo(list);
-                funcOffset += (list.Count - count);
+                int previousCount = list.Count;
+                func.WriteTo(this, list);
+                int newCount = (list.Count - previousCount);
+                list.WriteAt(start + 4, (UInt32)newCount);
+                funcOffset += newCount;
             }
 
         }
 
-        public Module(List<string> importedFuncs)
+        public int GetFuncId(Func func)
         {
+            var importedId = ImportedFuncs.IndexOf(func);
+            if (importedId != -1)
+                return importedId;
+
+            var id = Funcs.IndexOf(func);
+            if (id != -1)
+                return id + ImportedFuncs.Count;
+
+            return -1;
+        }
+
+        public Module(string fileName, List<Func> importedFuncs)
+        {
+            FileName = fileName;
             ImportedFuncs = importedFuncs;
         }
 
-        public Module(List<Func> funcs, List<string> importedFuncs)
+        public Module(string fileName, List<Func> importedFuncs, List<Func> funcs)
         {
+            FileName = fileName;
             Funcs = funcs;
             ImportedFuncs = importedFuncs;
         }

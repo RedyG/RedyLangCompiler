@@ -11,11 +11,8 @@ namespace Compiler.ParseTree
         public Proto Proto { get; }
         public IExpr Body { get; }
 
-        public ModuleFile ModuleFile { get; }
-
-        public Func(ModuleFile moduleFile, Proto proto, IExpr body)
+        public Func(Proto proto, IExpr body)
         {
-            ModuleFile = moduleFile;
             Proto = proto;
             Body = body;
         }
@@ -31,7 +28,7 @@ namespace Compiler.ParseTree
             if (proto == null)
                 return null;
 
-            var func = new AST.Func(proto, null);
+            var func = new AST.Func(proto, null, Proto.Identifier.Name == "main");
             globals.FuncsAST[this] = func;
 
             var body = Body.ToAST(this, globals, scopedSymbols);

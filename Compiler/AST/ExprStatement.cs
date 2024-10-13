@@ -16,9 +16,9 @@ namespace Compiler.AST
             Expr = expr;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
-            Expr.CodeGen(func, funcIds, symbols);
+            Expr.CodeGen(func, funcs, symbols);
             if (!Expr.Type.IsEmpty)
                 func.LastBlock.Instructions.Add(new Instruction(OpCode.Pop));
         }

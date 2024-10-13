@@ -22,20 +22,20 @@ namespace Compiler.AST
             Else = @else;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
-            Condition.CodeGen(func, funcIds, symbols);
+            Condition.CodeGen(func, funcs, symbols);
             var conditionBlock = func.LastBlock;
 
             func.AddBlock();
-            Then.CodeGen(func, funcIds, symbols);
+            Then.CodeGen(func, funcs, symbols);
             var thenBlock = func.LastBlock;
 
             Block? elseBlock = null;
             if (Else != null)
             {
                 func.AddBlock();
-                Else.CodeGen(func, funcIds, symbols);
+                Else.CodeGen(func, funcs, symbols);
                 elseBlock = func.LastBlock;
             }
 

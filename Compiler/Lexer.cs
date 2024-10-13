@@ -15,6 +15,10 @@ namespace Compiler
         // Keywords
         Pub,
         Type,
+        Struct,
+        Trait,
+        Impl,
+        For,
         Use,
         Mod,
         Fn,
@@ -32,6 +36,7 @@ namespace Compiler
         Semicolon,
         Colon,
         Comma,
+        Dot,
         DoubleColon,
 
         // Operators
@@ -65,6 +70,10 @@ namespace Compiler
             TokenType.Unknown => "Unknown",
             TokenType.Pub => "pub",
             TokenType.Type => "type",
+            TokenType.Struct => "struct",
+            TokenType.Trait => "trait",
+            TokenType.Impl => "impl",
+            TokenType.For => "for",
             TokenType.Use => "use",
             TokenType.Mod => "mod",
             TokenType.Fn => "fn",
@@ -80,6 +89,7 @@ namespace Compiler
             TokenType.Semicolon => ";",
             TokenType.Colon => ":",
             TokenType.Comma => ",",
+            TokenType.Dot => ".",
             TokenType.DoubleColon => "::",
             TokenType.Mul => "*",
             TokenType.Div => "/",
@@ -230,6 +240,10 @@ namespace Compiler
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Semicolon, _token.Range.End);
                 case ':':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Colon, _token.Range.End);
+                case ',':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Comma, _token.Range.End);
+                case '.':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Dot, _token.Range.End);
                 case '*':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Mul, _token.Range.End);
                 case '/':
@@ -252,6 +266,14 @@ namespace Compiler
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Pub, _token.Range.End);
             if (trimmedInput.StartsWith("type", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Type, _token.Range.End);
+            if (trimmedInput.StartsWith("struct", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 6), TokenType.Struct, _token.Range.End);
+            if (trimmedInput.StartsWith("trait", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 5), TokenType.Trait, _token.Range.End);
+            if (trimmedInput.StartsWith("impl", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Impl, _token.Range.End);
+            if (trimmedInput.StartsWith("for", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.For, _token.Range.End);
             if (trimmedInput.StartsWith("use", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Use, _token.Range.End);
             if (trimmedInput.StartsWith("mod", StringComparison.CurrentCulture))

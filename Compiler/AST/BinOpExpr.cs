@@ -38,20 +38,20 @@ namespace Compiler.AST
             (_, _) => throw new NotImplementedException()
         };
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             if (Op == BinOp.Assign)
             {
                 if (Left is not VarUseExpr)
                     throw new Exception("Left expression of an assignment should be a variable for the moment.");
 
-                Right.CodeGen(func, funcIds, symbols);
+                Right.CodeGen(func, funcs, symbols);
                 func.LastBlock.Instructions.Add(Instruction.CreateLocalSet((UInt16)symbols.VarIds[((VarUseExpr)Left).Var]));
                 return;
             }
 
-            Left.CodeGen(func, funcIds, symbols);
-            Right.CodeGen(func, funcIds, symbols);
+            Left.CodeGen(func, funcs, symbols);
+            Right.CodeGen(func, funcs, symbols);
             func.LastBlock.Instructions.Add(new Instruction(GetOpCode()));
         }
     }

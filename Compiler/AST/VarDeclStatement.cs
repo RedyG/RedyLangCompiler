@@ -18,11 +18,11 @@ namespace Compiler.AST
             Value = value;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             if (Value != null)
             {
-                Value.CodeGen(func, funcIds, symbols);
+                Value.CodeGen(func, funcs, symbols);
                 func.LastBlock.Instructions.Add(Instruction.CreateLocalSet((UInt16)symbols.CurrentVarId));
             }
 

@@ -17,7 +17,7 @@ namespace Compiler.AST
             Value = value;
         }
 
-        public void CodeGen(ByteCode.Func func, Dictionary<Func, int> funcIds, CodeGenSymbols symbols)
+        public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             if (Value < sbyte.MaxValue)
                 func.LastBlock.Instructions.Add(Instruction.CreateI8Const((sbyte)Value));

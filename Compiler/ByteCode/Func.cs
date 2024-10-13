@@ -8,6 +8,8 @@ namespace Compiler.ByteCode
 {
     public class Func
     {
+        public bool Main { get; set; }
+        public Module? Module { get; set; } = null;
         public int ParamsCount { get; }
         public int LocalsCount { get; set; }
         public List<Block> Blocks { get; } = new();
@@ -20,7 +22,9 @@ namespace Compiler.ByteCode
             return block;
         }
 
-        public void WriteTo(ByteList list)
+        public int GetId() => Module!.Funcs.IndexOf(this) + Module.ImportedFuncs.Count;
+
+        public void WriteTo(Module module, ByteList list)
         {
             List<KeyValuePair<Block, (int Pos, Int16 Size)>> branches = new();
 
@@ -37,7 +41,7 @@ namespace Compiler.ByteCode
                 Console.WriteLine("InitialSize: " + initialSize);
 
                 foreach (var instruction in block.Instructions)
-                    instruction.WriteTo(list);
+                    instruction.WriteTo(module, list);
 
                 if (block.BrInstruction.Value.OpCode == BrOpCode.Ret)
                 {
@@ -94,13 +98,14 @@ namespace Compiler.ByteCode
             }
         }
 
-        public Func(int paramsCount, int localsCount)
+        public Func(int paramsCount, int localsCount, bool main = false)
         {
             ParamsCount = paramsCount;
             LocalsCount = localsCount;
+            Main = main;
         }
 
-        public Func(int paramsCount, int localsCount, List<Block> blocks) : this(paramsCount, localsCount)
+        public Func(int paramsCount, int localsCount, List<Block> blocks, bool main = false) : this(paramsCount, localsCount, main)
         {
             Blocks = blocks;
         }
