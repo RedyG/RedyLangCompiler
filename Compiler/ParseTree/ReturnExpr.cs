@@ -18,28 +18,33 @@ namespace Compiler.ParseTree
             Expr = expr;
         }
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
-            var funcAST = func.ToAST(globals);
-            if (funcAST == null)
-                return null;
-
-            if (Expr == null)
+            if (decl is Func func)
             {
-                if (funcAST.Proto.ReturnType is not AST.Type.Void)
-                {
-                    Logger.MismatchedTypesReturnVoid(func.Proto.ModuleFile, func, funcAST.Proto.ReturnType, this);
+                var funcAST = func.ToAST(globals);
+                if (funcAST == null)
                     return null;
+
+                if (Expr == null)
+                {
+                    if (funcAST.Proto.ReturnType is not AST.Type.Void)
+                    {
+                        Logger.MismatchedTypesReturnVoid(func.Proto.ModuleFile, func, funcAST.Proto.ReturnType, this);
+                        return null;
+                    }
+
+                    return new AST.ReturnExpr(null);
                 }
-                    
-                return new AST.ReturnExpr(null);
+
+                var expr = Expr.ToAST(decl, globals, scopedSymbols);
+                if (expr == null)
+                    return null;
+
+                return new AST.ReturnExpr(expr);
             }
 
-            var expr = Expr.ToAST(func, globals, scopedSymbols);
-            if (expr == null)
-                return null;
-
-            return new AST.ReturnExpr(expr);
+            throw new Exception("ReturnExpr.ToAST called on a non-func decl");
         }
     }
 }

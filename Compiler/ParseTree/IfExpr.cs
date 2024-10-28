@@ -22,20 +22,20 @@ namespace Compiler.ParseTree
             Else = @else;
         }
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
             bool failed = false;
 
-            var condition = Condition.ToAST(func, globals, scopedSymbols);
+            var condition = Condition.ToAST(decl, globals, scopedSymbols);
             if (condition == null)
                 failed = true;
             else if (condition.Type is not AST.Type.Bool)
             {
-                Logger.MismatchedTypesIf(func.Proto.ModuleFile, condition.Type, this);
+                Logger.MismatchedTypesIf(decl.ModuleFile, condition.Type, this);
                 failed = true;
             }
 
-            var then = Then.ToAST(func, globals, scopedSymbols);
+            var then = Then.ToAST(decl, globals, scopedSymbols);
             if (then == null)
                 failed = true;
 
@@ -43,7 +43,7 @@ namespace Compiler.ParseTree
             {
                 if (then != null && !then.Type.IsEmpty)
                 {
-                    Logger.MismatchedTypesNoElse(func.Proto.ModuleFile, then.Type, this);
+                    Logger.MismatchedTypesNoElse(decl.ModuleFile, then.Type, this);
                     failed = true;
                 }
                 if (failed)
@@ -52,13 +52,13 @@ namespace Compiler.ParseTree
                 return new AST.IfExpr(then!.Type, condition!, then);
             }
 
-            var @else = Else.ToAST(func, globals, scopedSymbols);
+            var @else = Else.ToAST(decl, globals, scopedSymbols);
             if (@else == null || failed)
                 return null;
 
             if (then!.Type != @else.Type)
             {
-                Logger.MismatchedTypesIfElse(func.Proto.ModuleFile, then.Type, @else.Type, this);
+                Logger.MismatchedTypesIfElse(decl.ModuleFile, then.Type, @else.Type, this);
                 return null;
             }
 

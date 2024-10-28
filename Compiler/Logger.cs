@@ -153,6 +153,11 @@ namespace Compiler
             Error(new Log(moduleFile, $"cannot find function `{identifier.Name}` in this scope", new(identifier.Range)));
         }
 
+        public static void MethodNotFound(ModuleFile moduleFile, AST.Type type, Identifier identifier)
+        {
+            Error(new Log(moduleFile, $"cannot find method `{identifier.Name}` on the type `{type}`", new(identifier.Range)));
+        }
+
         public static void FuncPrivate(ModuleFile moduleFile, Identifier identifier, Func func)
         {
             var hints = func.Proto.ModuleFile.Module.Project == moduleFile.Module.Project ?
@@ -169,6 +174,11 @@ namespace Compiler
                 : null;
 
             Error(new Log(moduleFile, $"type `{identifier.Name}` is private", new(identifier.Range), hints));
+        }
+
+        public static void TypeNotFound(ModuleFile moduleFile, Identifier identifier)
+        {
+            Error(new Log(moduleFile, $"cannot find type `{identifier.Name}` in this scope", new(identifier.Range)));
         }
 
         public static void InvalidArgsCount(ModuleFile moduleFile, int paramsCount, CallExpr callExpr)

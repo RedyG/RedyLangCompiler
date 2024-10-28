@@ -12,6 +12,7 @@ namespace Compiler.ByteCode
         Br,
         BrIf,
         Ret,
+        RetVoid,
         Exit,
     }
 
@@ -21,7 +22,8 @@ namespace Compiler.ByteCode
         public const byte BrTrue = 0x02;
         public const byte BrFalse = 0x03;
         public const byte Exit = 0x04;
-        public const byte Ret = 0x07;
+        public const byte Ret = 0x06;
+        public const byte RetVoid = 0x07;
 
 
         public readonly BrOpCode OpCode;
@@ -38,6 +40,8 @@ namespace Compiler.ByteCode
         public static BrInstruction CreateExit() => new BrInstruction(BrOpCode.Exit);
 
         public static BrInstruction CreateRet() => new BrInstruction(BrOpCode.Ret);
+
+        public static BrInstruction CreateRetVoid() => new BrInstruction(BrOpCode.RetVoid);
 
         public static BrInstruction CreateBr(Block block) => new BrInstruction(BrOpCode.BrIf, block);
 

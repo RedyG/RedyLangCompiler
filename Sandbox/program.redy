@@ -1,21 +1,7 @@
 mod test;
-use fib::fib;
+use fib::{Human, get_average};
 
-type Human = struct {
-	age: i32,
-	height: i32
-};
-
-type Person = trait {
-	fn age(self) -> i32;
-};
-
-impl Person for Human {
-	fn age(self) -> i32 {
-		self.age
-	}
-}
 
 fn main() {
-    Human { age: 10, height: 200 }.age()
+    get_average(Human { age: 10, height: 200 }).age
 }

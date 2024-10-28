@@ -31,14 +31,9 @@ namespace Compiler.ParseTree
         public static int GetPrecedence(this BinOp binOp) => binOp switch
         {
             BinOp.Access => 5,
-            BinOp.Mul => 4,
-            BinOp.Div => 4,
-            BinOp.Add => 3,
-            BinOp.Sub => 3,
-            BinOp.Lt => 2,
-            BinOp.Le => 2,
-            BinOp.Gt => 2,
-            BinOp.Ge => 2,
+            BinOp.Mul or BinOp.Div => 4,
+            BinOp.Add or BinOp.Sub => 3,
+            BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge => 2,
             BinOp.Assign => 1,
             _ => throw new NotImplementedException(),
         };
@@ -65,7 +60,12 @@ namespace Compiler.ParseTree
             TokenType.Dot => BinOp.Access,
             TokenType.Add => BinOp.Add,
             TokenType.Sub => BinOp.Sub,
+            TokenType.Mul => BinOp.Mul,
+            TokenType.Div => BinOp.Div,
+            TokenType.Gt => BinOp.Gt,
+            TokenType.Ge => BinOp.Ge,
             TokenType.Lt => BinOp.Lt,
+            TokenType.Le => BinOp.Le,
             TokenType.Assign => BinOp.Assign,
             _ => null,
         };

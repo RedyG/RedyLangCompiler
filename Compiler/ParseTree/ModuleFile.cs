@@ -41,6 +41,12 @@ namespace Compiler.ParseTree
                         UsedFuncs.Add(import.Name, func);
                         continue;
                     }
+                    var type = module.GetPubType(import);
+                    if (type != null)
+                    {
+                        UsedTypeDecls.Add(import.Name, type);
+                        continue;
+                    }
                 }
             }
 
@@ -53,7 +59,7 @@ namespace Compiler.ParseTree
             .ToList()!;
 
         private List<AST.Type> ToAST(Dictionary<StringSegment, TypeDecl> typeDecls, GlobalSymbols globals) => typeDecls.Values
-            .Select(typeDecl => typeDecl.Type.ToAST(Module))
+            .Select(typeDecl => typeDecl.Type.ToAST(typeDecl, globals, new()))
             .Where(typeDecl => typeDecl != null)
             .ToList()!;
 

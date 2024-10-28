@@ -28,10 +28,10 @@ namespace Compiler.AST
                 switch (field.Type)
                 {
                     case Type.I32:
-                        func.LastBlock.Instructions.Add(Instruction.CreateI32Store(field.Offset()));
+                        func.LastBlock.Instructions.Add(Instruction.CreateI32Store((int)field.Offset()));
                         break;
                     case Type.Bool:
-                        func.LastBlock.Instructions.Add(Instruction.CreateI8Store(field.Offset()));
+                        func.LastBlock.Instructions.Add(Instruction.CreateI8Store((int)field.Offset()));
                         break;
                     default:
                         throw new NotImplementedException();

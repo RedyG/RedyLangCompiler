@@ -25,6 +25,12 @@ namespace Compiler.AST
                 symbols.AddVar(param);
             }
 
+            if (Proto.ReturnType is Type.Struct @struct)
+            {
+                func.ParamsCount++;
+                symbols.AddVar(new VarDeclStatement(@struct));
+            }
+
             funcs.Add(this, func);
 
             func.AddBlock();

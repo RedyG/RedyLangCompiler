@@ -10,7 +10,7 @@ namespace Compiler.ByteCode
     {
         public bool Main { get; set; }
         public Module? Module { get; set; } = null;
-        public int ParamsCount { get; }
+        public int ParamsCount { get; set; }
         public int LocalsCount { get; set; }
         public List<Block> Blocks { get; } = new();
         public Block LastBlock => Blocks[^1];

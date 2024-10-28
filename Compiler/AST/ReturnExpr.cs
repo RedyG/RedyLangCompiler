@@ -19,7 +19,20 @@ namespace Compiler.AST
 
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
-            Value?.CodeGen(func, funcs, symbols);
+            if (Value == null)
+            {
+                func.LastBlock.BrInstruction = BrInstruction.CreateRetVoid();
+                return;
+            }
+
+            if (Value.Type is Type.Struct @struct)
+            {
+                func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)(func.ParamsCount - 1)));
+                Value.CodeGen(func, funcs, symbols);
+                func.LastBlock.Instructions.Add(Instruction.CreateMemCpyS(@struct.Size()));
+
+                func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)(func.ParamsCount - 1)));
+            }
             func.LastBlock.BrInstruction = BrInstruction.CreateRet();
         }
     }

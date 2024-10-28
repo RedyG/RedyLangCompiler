@@ -1,8 +1,25 @@
 mod fib;
 
-pub fn fib(n: i32) -> i32 {
-    if n < 2 {
-        return n;
-    }
-    return fib(n - 1) + fib(n - 2);
+pub type Human = struct {
+	age: i32,
+	height: i32
+};
+
+type Person = trait {
+	fn get_age(self: Person) -> i32;
+	fn get_height(self: Person) -> i32;
+};
+
+impl Person for Human {
+	fn get_age(self: Human) -> i32 {
+		return self.age;
+	}
+
+	fn get_height(self: Human) -> i32 {
+		return self.height;
+	}
+}
+
+pub fn get_average(h: Human) -> Human {
+	return h.get_age();
 }

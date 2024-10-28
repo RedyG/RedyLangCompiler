@@ -25,11 +25,14 @@ namespace Compiler.ParseTree
             Range = range;
         }
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
-            var type = Type.ToAST(func.Proto.ModuleFile.Module);
+            var type = Type.ToAST(decl, globals, scopedSymbols);
             if (type == null)
+            {
+                Logger.TypeNotFound(decl.ModuleFile, Type.Identifer);
                 return null;
+            }
 
             var args = new List<(AST.Field Field, AST.IExpr Value)>();
             foreach (var namedArg in NamedArgs)
@@ -39,11 +42,11 @@ namespace Compiler.ParseTree
                     var field = @struct.Fields.FirstOrDefault(f => f.Name == namedArg.identifier.Name);
                     if (field == null)
                     {
-                        Logger.InvalidStructField(func.Proto.ModuleFile, type, namedArg.identifier);
+                        Logger.InvalidStructField(decl.ModuleFile, type, namedArg.identifier);
                         return null;
                     }
 
-                    var value = namedArg.expr.ToAST(func, globals, scopedSymbols);
+                    var value = namedArg.expr.ToAST(decl, globals, scopedSymbols);
                     if (value == null)
                         return null;
 

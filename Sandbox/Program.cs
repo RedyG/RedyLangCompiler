@@ -112,12 +112,12 @@ var parser = new Parser();
 var project = new Compiler.ParseTree.Project();
 parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\program.redy"));
 parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\fib.redy"));
-var modules = project.ToAST();
-if (Logger.CompilationFailed || modules == null)
+var projectAST = project.ToAST();
+if (Logger.CompilationFailed || projectAST == null)
     return;
 
 var funcSymbols = new Dictionary<Func, Compiler.ByteCode.Func>();
-var byteModules = modules.Select(module => module.CodeGen(funcSymbols)).ToList();
+var byteModules = projectAST.Modules.Select(module => module.CodeGen(funcSymbols)).ToList();
 foreach (var byteModule in byteModules)
 {
     var list = new Compiler.ByteCode.ByteList();

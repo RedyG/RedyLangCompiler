@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Compiler.ParseTree
 {
-    public interface IStatement : INode
+    public interface Decl
     {
-        public AST.IStatement? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols);
+        public ModuleFile ModuleFile { get; }
     }
 }

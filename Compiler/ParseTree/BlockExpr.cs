@@ -12,9 +12,11 @@ namespace Compiler.ParseTree
         public List<IStatement> Statements { get; }
         public IExpr? LastExpr { get; }
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
-            var statements = Statements.Select(s => s.ToAST(func, globals, scopedSymbols)).ToList();
+            var statements = Statements.Select(s =>
+            s.ToAST(decl, globals, scopedSymbols)
+            ).ToList();
 
             if (statements.Any(s => s == null))
                 return null;
@@ -22,7 +24,7 @@ namespace Compiler.ParseTree
             if (LastExpr == null)
                 return new AST.BlockExpr(new AST.Type.Void(), statements, null);
 
-            var lastExpr = LastExpr.ToAST(func, globals, scopedSymbols);
+            var lastExpr = LastExpr.ToAST(decl, globals, scopedSymbols);
             if (lastExpr == null)
                 return null;
 

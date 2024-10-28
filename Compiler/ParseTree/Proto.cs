@@ -23,21 +23,24 @@ namespace Compiler.ParseTree
             ModuleFile = moduleFile;
         }
 
-        public AST.Proto? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols)
+        public AST.Proto? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols)
         {
-            var @params = Params.Select(param => param.ToAST(func, globals, scopedSymbols) as AST.VarDeclStatement).ToList();
+            var @params = Params.Select(param => param.ToAST(decl, globals, scopedSymbols) as AST.VarDeclStatement).ToList();
 
             if (@params.Any(p => p == null))
                 return null;
 
             if (ReturnType == null)
-                return new AST.Proto(new AST.Type.Void(), @params);
+                return new AST.Proto(new AST.Type.Void(), @params, Identifier.Name.ToString());
 
-            var returnType = ReturnType.ToAST(func.Proto.ModuleFile.Module);
+            var returnType = ReturnType.ToAST(decl, globals, scopedSymbols);
             if (returnType == null)
+            {
+                Logger.TypeNotFound(decl.ModuleFile, ((Type.Identifier)ReturnType).Identifer);
                 return null;
+            }
             
-            return new AST.Proto(returnType, @params);
+            return new AST.Proto(returnType, @params, Identifier.Name.ToString());
         }
     }
 }

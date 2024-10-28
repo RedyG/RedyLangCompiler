@@ -18,15 +18,15 @@ namespace Compiler.ParseTree
             Name = name;
         }
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
-            if (scopedSymbols.VarDecls.TryGetValue(Name, out var decl))
+            if (scopedSymbols.VarDecls.TryGetValue(Name, out var var))
             {
-                return new AST.VarUseExpr(decl);
+                return new AST.VarUseExpr(var);
             }
             else
             {
-                Logger.ValueNotFoundInScope(func.Proto.ModuleFile, this);
+                Logger.ValueNotFoundInScope(decl.ModuleFile, this);
                 return null;
             }
 

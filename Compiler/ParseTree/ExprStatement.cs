@@ -17,9 +17,9 @@ namespace Compiler.ParseTree
             Expr = expr;
         }
 
-        public AST.IStatement? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols)
+        public AST.IStatement? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols)
         {
-            var expr = Expr.ToAST(func, globals, scopedSymbols, true);
+            var expr = Expr.ToAST(decl, globals, scopedSymbols, true);
             if (expr == null)
                 return null;
 

@@ -23,28 +23,27 @@ namespace Compiler.ParseTree
         }
 
         private static AST.Type GetTypeAST(AST.Type left, BinOp binOp, AST.Type right) => (left, binOp, right) switch {
-            (var type, BinOp.Add or BinOp.Sub, _) => type,
-            (_, BinOp.Lt, _) => new AST.Type.Bool(),
+            (var type, BinOp.Add or BinOp.Sub or BinOp.Mul or BinOp.Div, _) => type,
+            (_, BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge, _) => new AST.Type.Bool(),
             (_, BinOp.Assign, var type) => type,
-            _ => throw new NotImplementedException()
         };
 
-        public AST.IExpr? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
+        public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
         {
             if (OpNode.Op == BinOp.Access)
             {
-                var leftExpr = Left.ToAST(func, globals, scopedSymbols);
+                var leftExpr = Left.ToAST(decl, globals, scopedSymbols);
                 if (leftExpr == null)
                     return null;
 
 
                 if (Right is Identifier identifier) {
-                    if (leftExpr.Type is AST.Type.Struct @struct)
+                    if (leftExpr.Type.ToConcrete() is AST.Type.Struct @struct)
                     {
                         var field = @struct.Fields.FirstOrDefault(f => f.Name == identifier.Name);
                         if (field == null)
                         {
-                            Logger.InvalidStructField(func.Proto.ModuleFile, @struct, identifier);
+                            Logger.InvalidStructField(decl.ModuleFile, @struct, identifier);
                             return null;
                         }
 
@@ -55,15 +54,15 @@ namespace Compiler.ParseTree
                 return null; // TODO: error this, just lazy rn
             }
 
-            var left = Left.ToAST(func, globals, scopedSymbols);
-            var right = Right.ToAST(func, globals, scopedSymbols);
+            var left = Left.ToAST(decl, globals, scopedSymbols);
+            var right = Right.ToAST(decl, globals, scopedSymbols);
 
             if (left == null || right == null)
                 return null;
 
             if (left.Type != right.Type)
             {
-                Logger.MismatchedTypesOp(func.Proto.ModuleFile, left.Type, right.Type, OpNode);
+                Logger.MismatchedTypesOp(decl.ModuleFile, left.Type, right.Type, OpNode);
                 return null;
             }
 

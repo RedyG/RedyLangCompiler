@@ -23,6 +23,11 @@ namespace Compiler.AST
         {
             foreach (var arg in Args)
                 arg.CodeGen(func, funcs, symbols);
+
+            if (Type is Type.Struct @struct)
+            {
+                func.LastBlock.Instructions.Add(Instruction.CreateAlloca(@struct.Size()));
+            }
             func.LastBlock.Instructions.Add(Instruction.CreateCall(Func.CodeGen(funcs)));
         }
     }

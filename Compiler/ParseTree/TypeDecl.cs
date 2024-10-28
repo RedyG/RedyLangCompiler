@@ -7,19 +7,21 @@ using System.Threading.Tasks;
 
 namespace Compiler.ParseTree
 {
-    public class TypeDecl
+    public class TypeDecl : Decl
     {
+        public bool IsAlias { get; }
         public ModuleFile ModuleFile { get; }
         public VisibilityNode VisibilityNode { get; }
         public Identifier Identifier { get; }
         public Type Type { get; }
 
-        public TypeDecl(ModuleFile moduleFile, VisibilityNode visibilityNode, Identifier identifier, Type type)
+        public TypeDecl(ModuleFile moduleFile, VisibilityNode visibilityNode, Identifier identifier, Type type, bool isAlias)
         {
             ModuleFile = moduleFile;
             VisibilityNode = visibilityNode;
             Identifier = identifier;
             Type = type;
+            IsAlias = isAlias;
         }
 
     }

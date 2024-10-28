@@ -9,7 +9,9 @@ namespace Compiler.ParseTree
 {
     public class GlobalSymbols
     {
+        public AST.Project Project { get; set; }
         public Dictionary<Func, AST.Func> FuncsAST { get; } = new();
+        public Dictionary<Type, AST.Type> TypesAST { get; } = new();
     }
 
     public class ScopedSymbols

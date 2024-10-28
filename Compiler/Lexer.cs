@@ -15,6 +15,7 @@ namespace Compiler
         // Keywords
         Pub,
         Type,
+        Alias,
         Struct,
         Trait,
         Impl,
@@ -61,6 +62,7 @@ namespace Compiler
         {
             TokenType.Fn => true,
             TokenType.Type => true,
+            TokenType.Alias => true,
             TokenType.Use => true,
             _ => false,
         };
@@ -70,6 +72,7 @@ namespace Compiler
             TokenType.Unknown => "Unknown",
             TokenType.Pub => "pub",
             TokenType.Type => "type",
+            TokenType.Alias => "alias",
             TokenType.Struct => "struct",
             TokenType.Trait => "trait",
             TokenType.Impl => "impl",
@@ -266,6 +269,8 @@ namespace Compiler
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Pub, _token.Range.End);
             if (trimmedInput.StartsWith("type", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Type, _token.Range.End);
+            if (trimmedInput.StartsWith("alias", StringComparison.CurrentCulture))
+                return _token = new Token(trimmedInput.Subsegment(0, 5), TokenType.Alias, _token.Range.End);
             if (trimmedInput.StartsWith("struct", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 6), TokenType.Struct, _token.Range.End);
             if (trimmedInput.StartsWith("trait", StringComparison.CurrentCulture))
@@ -296,7 +301,7 @@ namespace Compiler
             if (char.IsLetter(trimmedInput[0]) || trimmedInput[0] == '_')
             {
                 var i = 1;
-                while (i < trimmedInput.Length && (char.IsLetterOrDigit(trimmedInput[i]) || trimmedInput[0] == '_'))
+                while (i < trimmedInput.Length && (char.IsLetterOrDigit(trimmedInput[i]) || trimmedInput[i] == '_'))
                     i += 1;
 
                 return _token = new Token(trimmedInput.Subsegment(0, i), TokenType.Identifier, _token.Range.End);

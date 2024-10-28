@@ -17,6 +17,6 @@ namespace Compiler.ParseTree
             Value = value;
         }
 
-        AST.IExpr IExpr.ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false) => new AST.IntExpr(Value);
+        AST.IExpr IExpr.ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false) => new AST.IntExpr(Value);
     }
 }

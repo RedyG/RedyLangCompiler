@@ -15,8 +15,9 @@ namespace Compiler.ByteCode
         // BrFalse i16
         // Exit,
 
-        Call = 0x06, // u16
+        Call = 0x05, // u16
         // Ret
+        // RetVoid
         Pop = 0x08,
         LocalGet, // u16
         LocalSet, // u16
@@ -113,6 +114,9 @@ namespace Compiler.ByteCode
         Alloca,
         AllocaPop,
         GcMalloc,
+
+        MemCpy,
+        MemCpyS
     }
 
     public class InvalidInstructionException : Exception
@@ -127,16 +131,18 @@ namespace Compiler.ByteCode
     {
         [FieldOffset(0)] public readonly OpCode OpCode;
 
-        [FieldOffset(8)] public readonly sbyte i8;
-        [FieldOffset(8)] public readonly Int16 i16;
-        [FieldOffset(8)] public readonly Int32 i32;
-        [FieldOffset(8)] public readonly Int64 i64;
-        [FieldOffset(8)] public readonly UInt16 u16;
+        [FieldOffset(8)] public readonly Func? func = null;
 
-        [FieldOffset(16)] public readonly Func? func = null;
+        [FieldOffset(16)] public readonly sbyte i8;
+        [FieldOffset(16)] public readonly Int16 i16;
+        [FieldOffset(16)] public readonly Int32 i32;
+        [FieldOffset(16)] public readonly Int64 i64;
+        [FieldOffset(16)] public readonly UInt16 u16;
+        [FieldOffset(16)] public readonly UInt32 u32;
 
+        [FieldOffset(24)] public readonly Int32 i32b;
 
-
+        [FieldOffset(28)] public readonly UInt32 u32c;
 
         public Instruction(OpCode opCode)
         {
@@ -179,6 +185,14 @@ namespace Compiler.ByteCode
             this.u16 = u16;
         }
 
+        private Instruction(OpCode opCode, Int32 i32, Int32 i32b, UInt32 u32c)
+        {
+            OpCode = opCode;
+            this.i32 = i32;
+            this.i32b = i32b;
+            this.u32c = u32c;
+        }
+
         public static Instruction CreateCall(Func func) => new Instruction(OpCode.Call, func);
         public static Instruction CreateLocalGet(UInt16 id) => new Instruction(OpCode.LocalGet, id);
         public static Instruction CreateLocalSet(UInt16 id) => new Instruction(OpCode.LocalSet, id);
@@ -196,9 +210,12 @@ namespace Compiler.ByteCode
         public static Instruction CreateI32Store(Int32 offset) => new Instruction(OpCode.I32Store, offset);
         public static Instruction CreateI64Store(Int32 offset) => new Instruction(OpCode.I64Store, offset);
 
-        public static Instruction CreateAlloca(Int32 size) => new Instruction(OpCode.Alloca, size);
-        public static Instruction CreateAllocaPop(Int32 size) => new Instruction(OpCode.AllocaPop, size);
-        public static Instruction CreateGcMalloc(Int32 size) => new Instruction(OpCode.GcMalloc, size);
+        public static Instruction CreateAlloca(UInt32 size) => new Instruction(OpCode.Alloca, size);
+        public static Instruction CreateAllocaPop(UInt32 size) => new Instruction(OpCode.AllocaPop, size);
+        public static Instruction CreateGcMalloc(UInt32 size) => new Instruction(OpCode.GcMalloc, size);
+
+        public static Instruction CreateMemCpy(Int32 dst, Int32 src, UInt32 size) => new Instruction(OpCode.MemCpy, dst, src, size);
+        public static Instruction CreateMemCpyS(UInt32 size) => new Instruction(OpCode.MemCpyS, size);
 
         public void WriteTo(Module module, ByteList list)
         {
@@ -235,10 +252,20 @@ namespace Compiler.ByteCode
                 case OpCode.I16Store:    
                 case OpCode.I32Store:
                 case OpCode.I64Store:
+                    list.Add(i32);
+                    break;
+
                 case OpCode.Alloca:
                 case OpCode.AllocaPop:
                 case OpCode.GcMalloc:
+                case OpCode.MemCpyS:
+                    list.Add(u32);
+                    break;
+
+                case OpCode.MemCpy:
                     list.Add(i32);
+                    list.Add(i32b);
+                    list.Add(u32c);
                     break;
 
             }

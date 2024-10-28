@@ -19,11 +19,11 @@ namespace Compiler.AST
             Struct = @struct;
         }
 
-        public int Offset()
+        public uint Offset()
         {
             var fields = Struct.Fields;
             var index = fields.IndexOf(this);
-            return fields.Take(index).Sum(f => f.Type.Size());
+            return (uint)fields.Take(index).Sum(f => f.Type.Size());
         }
     }
 }

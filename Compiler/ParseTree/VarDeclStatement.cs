@@ -22,12 +22,12 @@ namespace Compiler.ParseTree
         }
 
 
-        public AST.IStatement? ToAST(Func func, GlobalSymbols globals, ScopedSymbols scopedSymbols)
+        public AST.IStatement? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols)
         {
             AST.Type? type = null;
             if (Type != null)
             {
-                type = Type.ToAST(func.Proto.ModuleFile.Module);
+                type = Type.ToAST(decl, globals, scopedSymbols);
                 if (type == null)
                     return null;
             }
@@ -35,7 +35,7 @@ namespace Compiler.ParseTree
             AST.IExpr? value = null;
             if (Value != null)
             {
-                value = Value.ToAST(func, globals, scopedSymbols);
+                value = Value.ToAST(decl, globals, scopedSymbols);
                 if (value == null)
                     return null;
 
@@ -44,14 +44,14 @@ namespace Compiler.ParseTree
 
                 if (type != value.Type)
                 {
-                    Logger.MismatchedTypesVarDecl(func.Proto.ModuleFile, type, value.Type, this);
+                    Logger.MismatchedTypesVarDecl(decl.ModuleFile, type, value.Type, this);
                     return null;
                 }
             }
 
             if (type == null)
             {
-                Logger.ExpectedTypeOrValueVarDecl(func.Proto.ModuleFile, this);
+                Logger.ExpectedTypeOrValueVarDecl(decl.ModuleFile, this);
                 return null;
             }
 

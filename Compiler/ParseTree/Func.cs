@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Compiler.ParseTree
 {
-    public class Func
+    public class Func : Decl
     {
         public Proto Proto { get; }
         public IExpr Body { get; }
+
+        public ModuleFile ModuleFile => Proto.ModuleFile;
 
         public Func(Proto proto, IExpr body)
         {

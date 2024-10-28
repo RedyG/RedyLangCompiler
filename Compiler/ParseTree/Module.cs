@@ -94,17 +94,17 @@ namespace Compiler.ParseTree
             return null;
         }
 
-        public Type? GetType(Identifier identifier, bool error = true)
+        public TypeDecl? GetType(Identifier identifier, bool error = true)
         {
             foreach (var moduleFile in ModuleFiles)
             {
                 if (moduleFile.TypeDecls.TryGetValue(identifier.Name, out var typeDecl))
-                    return typeDecl.Type;
+                    return typeDecl;
 
                 if (moduleFile.UsedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
                 {
                     if (typeDecl.VisibilityNode.Visibility == Visibility.Pub)
-                        return typeDecl.Type;
+                        return typeDecl;
 
                     if (error)
                     {
@@ -124,14 +124,14 @@ namespace Compiler.ParseTree
             return null;
         }
 
-        public Type? GetPubType(Identifier identifier, bool error = true)
+        public TypeDecl? GetPubType(Identifier identifier, bool error = true)
         {
             foreach (var moduleFile in ModuleFiles)
             {
                 if (moduleFile.TypeDecls.TryGetValue(identifier.Name, out var typeDecl))
                 {
                     if (typeDecl.VisibilityNode.Visibility == Visibility.Pub)
-                        return typeDecl.Type;
+                        return typeDecl;
 
                     if (error)
                     {
@@ -143,7 +143,7 @@ namespace Compiler.ParseTree
                 if (moduleFile.UsedTypeDecls.TryGetValue(identifier.Name, out typeDecl))
                 {
                     if (typeDecl.VisibilityNode.Visibility == Visibility.Pub)
-                        return typeDecl.Type;
+                        return typeDecl;
 
                     if (error)
                     {
