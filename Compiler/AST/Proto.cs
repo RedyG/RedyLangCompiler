@@ -9,17 +9,17 @@ namespace Compiler.AST
     public class Proto
     {
         public ModuleFile? Module { get; set; }
-        public Type ReturnType { get; set; }
-        public List<VarDeclStatement> Params { get; set; } = new();
+        public IType ReturnType { get; set; }
+        public List<Param> Params { get; set; } = new();
         public string Name;
 
-        public Proto(Type returnType, string name)
+        public Proto(IType returnType, string name)
         {
             ReturnType = returnType;
             Name = name;
         }
 
-        public Proto(Type returnType, List<VarDeclStatement> @params, string name, ModuleFile? module = null)
+        public Proto(IType returnType, List<Param> @params, string name, ModuleFile? module)
         {
             ReturnType = returnType;
             Name = name;

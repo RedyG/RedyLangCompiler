@@ -22,7 +22,7 @@ namespace Compiler.ParseTree
                 return null;
 
             if (LastExpr == null)
-                return new AST.BlockExpr(new AST.Type.Void(), statements, null);
+                return new AST.BlockExpr(new AST.IType.Void(), statements, null);
 
             var lastExpr = LastExpr.ToAST(decl, globals, scopedSymbols);
             if (lastExpr == null)

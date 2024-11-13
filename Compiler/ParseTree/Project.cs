@@ -11,7 +11,6 @@ namespace Compiler.ParseTree
     {
         public Dictionary<StringSegment, ParseTree.Module> Modules { get; } = new();
         public Dictionary<string, string> Files { get; } = new();
-        public List<ImplDecl> Impls { get; } = new();
 
         public AST.Project? ToAST()
         {
@@ -23,23 +22,17 @@ namespace Compiler.ParseTree
                 foreach (var moduleFile in module.ModuleFiles)
                     moduleFile.ResolveUseDecls();
 
-            foreach (var impl in Impls)
-            {
-                var implAST = impl.ToAST(globals);
-                if (implAST != null)
-                    project.Impls.Add(implAST);
-            }
+            foreach (var module in Modules.Values)
+                foreach (var moduleFile in module.ModuleFiles)
+                    project.Modules.Add(moduleFile.Register(globals));
+
+            foreach (var (trait, traitAST) in globals.Traits)
+                trait.ToAST(globals, traitAST);
+
 
             foreach (var module in Modules.Values)
-            {
                 foreach (var moduleFile in module.ModuleFiles)
-                {
-                    var moduleAST = moduleFile?.ToAST(globals);
-                    if (moduleAST != null)
-                        project.Modules.Add(moduleAST);
-                }
-            }
-
+                    moduleFile?.ToAST(globals, moduleFile.Register(globals));
 
             return project;
         }

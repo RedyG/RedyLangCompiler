@@ -112,33 +112,33 @@ namespace Compiler
             Error(new Log(lexer, "unexpected token", new Underline(lexer.Token.Range, causeMessage)));
         }
 
-        public static void MismatchedTypesReturnVoid(ModuleFile moduleFile, Func func, AST.Type returnType, ReturnExpr returnExpr)
+        public static void MismatchedTypesReturnVoid(ModuleFile moduleFile, Func func, AST.IType returnType, ReturnExpr returnExpr)
         {
             Error(new Log(moduleFile, "mismatched types", new(func.Proto.ReturnType.GetRange(), $"expected `{returnType}` because it is the return type"), new List<Underline> { new(returnExpr.Range, "found `void`") }));
         }
 
 
-        public static void MismatchedTypesIf(ModuleFile moduleFile, AST.Type type, IfExpr ifExpr)
+        public static void MismatchedTypesIf(ModuleFile moduleFile, AST.IType type, IfExpr ifExpr)
         {
             Error(new Log(moduleFile, "mismatched types", new(ifExpr.Condition.Range, $"expected `bool` because it's the condition of an if expression, found `{type}`")));
         }
 
-        public static void MismatchedTypesOp(ModuleFile moduleFile, AST.Type expected, AST.Type found, BinOpNode opNode)
+        public static void MismatchedTypesOp(ModuleFile moduleFile, AST.IType expected, AST.IType found, BinOpNode opNode)
         {
             Error(new Log(moduleFile, "mismatched types", new(opNode.Range, $"cannot ${opNode.Op.ToSentenceFormat()} the type `${found} to the type `${expected}`")));
         }
 
-        public static void MismatchedTypesVarDecl(ModuleFile moduleFile, AST.Type expected, AST.Type found, VarDeclStatement varDecl)
+        public static void MismatchedTypesVarDecl(ModuleFile moduleFile, AST.IType expected, AST.IType found, VarDeclStatement varDecl)
         {
             Error(new Log(moduleFile, "mismatched types", new(varDecl.Type.GetRange(), $"expected `{expected}`"), new List<Underline> { new(varDecl.Value!.Range, $"found `{found}`") }));
         }
 
-        public static void MismatchedTypesIfElse(ModuleFile moduleFile, AST.Type thenType, AST.Type elseType, IExpr @else)
+        public static void MismatchedTypesIfElse(ModuleFile moduleFile, AST.IType thenType, AST.IType elseType, IExpr @else)
         {
             Error(new Log(moduleFile, "mismatched types", new(@else.Range, $"expected `{thenType}` because it's the type of the then branch, found `{elseType}`")));
         }
 
-        public static void MismatchedTypesNoElse(ModuleFile moduleFile, AST.Type type, IfExpr ifExpr)
+        public static void MismatchedTypesNoElse(ModuleFile moduleFile, AST.IType type, IfExpr ifExpr)
         {
             Error(new Log(moduleFile, "mismatched types", new(ifExpr.Range, $"expected `void` because there is no else branch, found `{type}`")));
         }
@@ -153,7 +153,7 @@ namespace Compiler
             Error(new Log(moduleFile, $"cannot find function `{identifier.Name}` in this scope", new(identifier.Range)));
         }
 
-        public static void MethodNotFound(ModuleFile moduleFile, AST.Type type, Identifier identifier)
+        public static void MethodNotFound(ModuleFile moduleFile, AST.IType type, Identifier identifier)
         {
             Error(new Log(moduleFile, $"cannot find method `{identifier.Name}` on the type `{type}`", new(identifier.Range)));
         }
@@ -191,7 +191,7 @@ namespace Compiler
             Error(new Log(moduleFile, "expected type or value", new(varDecl.Range, "expected either a type or a value, found neither")));
         }
 
-        public static void InvalidStructField(ModuleFile moduleFile, AST.Type type, Identifier fieldIdentifier)
+        public static void InvalidStructField(ModuleFile moduleFile, AST.IType type, Identifier fieldIdentifier)
         {
             Error(new Log(moduleFile, $"invalid field `{fieldIdentifier.Name}`", new(fieldIdentifier.Range, $"field `{fieldIdentifier.Name}` does not exist in the struct `{type}`")));
         }

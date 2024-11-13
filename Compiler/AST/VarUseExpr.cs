@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class VarUseExpr : IExpr
     {
-        public Type Type => Var.Type;
+        public IType Type => Var.Type;
         public VarDeclStatement Var { get; set; }
 
         public VarUseExpr(VarDeclStatement var)

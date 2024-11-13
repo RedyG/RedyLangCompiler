@@ -9,10 +9,10 @@ namespace Compiler.AST
 {
     internal class StructConstructorExpr : IExpr
     {
-        public Type Type { get; }
+        public IType Type { get; }
         public List<(Field Field, IExpr Value)> Args { get; }
 
-        public StructConstructorExpr(Type type, List<(Field Field, IExpr Value)> args)
+        public StructConstructorExpr(IType type, List<(Field Field, IExpr Value)> args)
         {
             Type = type;
             Args = args;
@@ -27,10 +27,10 @@ namespace Compiler.AST
                 value.CodeGen(func, funcs, symbols);
                 switch (field.Type)
                 {
-                    case Type.I32:
+                    case IType.I32:
                         func.LastBlock.Instructions.Add(Instruction.CreateI32Store((int)field.Offset()));
                         break;
-                    case Type.Bool:
+                    case IType.Bool:
                         func.LastBlock.Instructions.Add(Instruction.CreateI8Store((int)field.Offset()));
                         break;
                     default:

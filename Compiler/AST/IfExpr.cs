@@ -9,12 +9,12 @@ namespace Compiler.AST
 {
     public class IfExpr : IExpr
     {
-        public Type Type { get; }
+        public IType Type { get; }
         public IExpr Condition { get; }
         public IExpr Then { get; }
         public IExpr? Else { get; }
 
-        public IfExpr(Type type, IExpr condition, IExpr then, IExpr? @else = null)
+        public IfExpr(IType type, IExpr condition, IExpr then, IExpr? @else = null)
         {
             Type = type;
             Condition = condition;

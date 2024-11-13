@@ -117,7 +117,10 @@ if (Logger.CompilationFailed || projectAST == null)
     return;
 
 var funcSymbols = new Dictionary<Func, Compiler.ByteCode.Func>();
-var byteModules = projectAST.Modules.Select(module => module.CodeGen(funcSymbols)).ToList();
+var byteModules = projectAST.Modules.Select(
+    module =>
+    module.CodeGen(funcSymbols)
+    ).ToList();
 foreach (var byteModule in byteModules)
 {
     var list = new Compiler.ByteCode.ByteList();

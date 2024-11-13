@@ -190,22 +190,9 @@ namespace Compiler
             return new CallExpr(new TextRange(expr.Range.Start, end), expr, args);
         }
 
-        private IExpr ParsePostfix(ModuleFile moduleFile, IExpr expr)
-        {
-            if (lexer.Token.Type == TokenType.LParen)
-                return ParsePostfix(moduleFile, ParseArgs(moduleFile, expr));
-
-            return expr;
-        }
-
-        private IExpr ParsePostfix(ModuleFile moduleFile)
-        {
-            return ParsePostfix(moduleFile, ParsePrimary(moduleFile));
-        }
-
         private IExpr ParseUnary(ModuleFile moduleFile)
         {
-            return ParsePostfix(moduleFile);
+            return ParsePrimary(moduleFile);
         }
 
         private VarDeclStatement ParseVarDecl(ModuleFile moduleFile)
@@ -244,17 +231,30 @@ namespace Compiler
             var expr = ParseUnary(moduleFile);
             while (true)
             {
-                var opNode = BinOpNode.FromToken(lexer.Token);
-                if (opNode == null)
-                    break;
+                if (lexer.Token.Type == TokenType.LParen) // todo abstract other postfix
+                {
+                    var opPrecedence = 5;
+                    if (opPrecedence < precedence)
+                        break;
 
-                var opPrecedence = opNode.Value.Op.GetPrecedence();
-                if (opPrecedence < precedence)
-                    break;
+                    expr = ParseArgs(moduleFile, expr);
+                    continue;
+                }
 
-                lexer.Consume();
-                var rhs = ParseExpr(moduleFile, opPrecedence + (opNode.Value.Op.LeftAssociative() ? 1 : 0));
-                expr = new BinOpExpr(new TextRange(expr.Range.Start, rhs.Range.End), expr, opNode.Value, rhs);
+                var binOpNode = BinOpNode.FromToken(lexer.Token);
+                if (binOpNode != null)
+                {
+                    var opPrecedence = binOpNode.Value.Op.GetPrecedence();
+                    if (opPrecedence < precedence)
+                        break;
+
+                    lexer.Consume();
+                    var rhs = ParseExpr(moduleFile, opPrecedence + (binOpNode.Value.Op.LeftAssociative() ? 1 : 0));
+                    expr = new BinOpExpr(new TextRange(expr.Range.Start, rhs.Range.End), expr, binOpNode.Value, rhs);
+                    continue;
+                }
+
+                break;
             }
 
             return new Item(expr);
@@ -343,7 +343,7 @@ namespace Compiler
             return new ParseTree.Type.Identifier(ParseIdentifier());
         }
 
-        private VarDeclStatement ParseParam(ModuleFile moduleFile)
+        private Param ParseParam(ModuleFile moduleFile)
         {
             var identifer = ParseIdentifier();
             if (lexer.Token.Type != TokenType.Colon)
@@ -351,7 +351,7 @@ namespace Compiler
             lexer.Consume();
             var type = ParseType(moduleFile);
             var value = lexer.Token.Type == TokenType.Assign ? ParseExpr(moduleFile) : null;
-            return new VarDeclStatement(new TextRange(identifer.Range.Start, type.GetRange().End), type, identifer, value);
+            return new Param(new TextRange(identifer.Range.Start, type.GetRange().End), type, identifer, value);
         }
 
         private Identifier ParseIdentifier()
@@ -369,7 +369,7 @@ namespace Compiler
             lexer.Consume(); // consume fn
             var identifier = ParseIdentifier();
 
-            var @params = new List<VarDeclStatement>();
+            var @params = new List<Param>();
             if (lexer.Token.Type != TokenType.LParen)
                 Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LParen });
             lexer.Consume();
@@ -543,10 +543,10 @@ namespace Compiler
                         break;
                     case TokenType.Impl:
                         var impl = ParseImpl(moduleFile);
-                        project.Impls.Add(impl);
+                        moduleFile.Impls.Add(impl);
                         break;
                     default:
-                        Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Fn });
+                        Logger.UnexpectedToken(lexer, [ TokenType.Fn ]);
                         while (!lexer.Token.Type.IsModuleItem())
                             lexer.Consume();
                         break;

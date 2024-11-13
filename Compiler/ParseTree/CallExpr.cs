@@ -36,7 +36,7 @@ namespace Compiler.ParseTree
                     return null;
                 }
 
-                var calleeAST = callee.ToAST(globals);
+                var calleeAST = globals.FuncsAST[callee];
                 if (calleeAST == null)
                     return null;
 
@@ -60,7 +60,7 @@ namespace Compiler.ParseTree
                     return null;
                 }
 
-                if (methodAST.Proto.Params.Count != Args.Count)
+                if (methodAST.Proto.Params.Count != Args.Count + 1)
                 {
                     Logger.InvalidArgsCount(decl.ModuleFile, methodAST.Proto.Params.Count, this);
                     return null;

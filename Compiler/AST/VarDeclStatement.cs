@@ -9,10 +9,10 @@ namespace Compiler.AST
 {
     public class VarDeclStatement : IStatement
     {
-        public Type Type { get; }
+        public IType Type { get; }
         public IExpr? Value { get; set; }
 
-        public VarDeclStatement(Type type, IExpr? value = null)
+        public VarDeclStatement(IType type, IExpr? value = null)
         {
             Type = type;
             Value = value;
@@ -28,6 +28,15 @@ namespace Compiler.AST
 
             func.LocalsCount++;
             symbols.AddVar(this);
+        }
+    }
+
+    public class Param : VarDeclStatement
+    {
+        private bool _hasDefaultValue;
+        public bool HasDefaultValue => _hasDefaultValue || Value != null;
+        public Param(IType type, IExpr? value = null, bool hasDefaultValue = false) : base(type, value)
+        {
         }
     }
 }

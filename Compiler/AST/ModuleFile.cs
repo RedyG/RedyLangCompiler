@@ -11,12 +11,20 @@ namespace Compiler.AST
         public string FileName { get; set; }
         public List<Func> ImportedFuncs { get; set; } = new();
         public List<Func> Funcs { get; set; } = new();
-        public List<Type> Types { get; set; } = new();
+        public List<IType> Types { get; set; } = new();
+        public Project Project { get; set; }
 
         public ByteCode.Module CodeGen(Dictionary<Func, ByteCode.Func> funcSymbols)
         {
-            var importedFuncs = ImportedFuncs.Select(func => func.CodeGen(funcSymbols)).ToList();
-            var funcs = Funcs.Select(func => func.CodeGen(funcSymbols)).ToList();
+            var importedFuncs = ImportedFuncs.Select(func =>
+                func.CodeGen(funcSymbols)
+            ).ToList();
+
+            List<ByteCode.Func> funcs = [
+                ..Funcs.Select(func => func.CodeGen(funcSymbols)),
+                ..Project.GetModuleMethods(this).Select(func => func.CodeGen(funcSymbols))
+            ];
+
             var module = new ByteCode.Module(FileName, importedFuncs, funcs);
             foreach (var func in module.Funcs)
                 func.Module = module;
@@ -24,12 +32,13 @@ namespace Compiler.AST
             return module;
         }
 
-        public ModuleFile(string fileName, List<Func> funcs, List<Func> importedFuncs, List<Type> types)
+        public ModuleFile(string fileName, List<Func> funcs, List<Func> importedFuncs, List<IType> types, Project project)
         {
             Funcs = funcs;
             ImportedFuncs = importedFuncs;
             FileName = fileName;
             Types = types;
+            Project = project;
         }
     }
 }

@@ -8,15 +8,17 @@ namespace Compiler.AST
 {
     public class Impl
     {
-        public Type Trait { get; }
-        public Type Type { get; }
+        public IType Trait { get; }
+        public IType Type { get; }
         public List<Func> Funcs { get; }
+        public ModuleFile Module { get; }
 
-        public Impl(Type trait, Type type, List<Func> funcs)
+        public Impl(IType trait, IType type, List<Func> funcs, ModuleFile module)
         {
             Trait = trait;
             Type = type;
             Funcs = funcs;
+            Module = module;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class ReturnExpr : IExpr
     {
-        public Type Type => new Type.Never();
+        public IType Type => new IType.Never();
         public IExpr? Value { get; }
 
         public ReturnExpr(IExpr? value)
@@ -25,7 +25,7 @@ namespace Compiler.AST
                 return;
             }
 
-            if (Value.Type is Type.Struct @struct)
+            if (Value.Type.ToConcrete() is IType.Struct @struct)
             {
                 func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)(func.ParamsCount - 1)));
                 Value.CodeGen(func, funcs, symbols);

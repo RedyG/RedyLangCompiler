@@ -21,10 +21,30 @@ namespace Compiler.ParseTree
             Value = value;
         }
 
+        public AST.Param? Register(Decl decl, GlobalSymbols globals, ScopedSymbols scoped)
+        {
+            AST.IType? type = null;
+            if (Type != null)
+            {
+                type = Type.ToAST(decl, globals, scoped);
+                if (type == null)
+                    return null;
+            }
+
+            if (type == null)
+            {
+                Logger.ExpectedTypeOrValueVarDecl(decl.ModuleFile, this);
+                return null;
+            }
+
+            var param = new AST.Param(type, null, Value != null);
+            return param;
+        }
+
 
         public AST.IStatement? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols)
         {
-            AST.Type? type = null;
+            AST.IType? type = null;
             if (Type != null)
             {
                 type = Type.ToAST(decl, globals, scopedSymbols);
@@ -44,7 +64,7 @@ namespace Compiler.ParseTree
 
                 if (type != value.Type)
                 {
-                    Logger.MismatchedTypesVarDecl(decl.ModuleFile, type, value.Type, this);
+                    Logger.MismatchedTypesVarDecl(decl.ModuleFile, (AST.IType)type, (AST.IType)value.Type, this);
                     return null;
                 }
             }

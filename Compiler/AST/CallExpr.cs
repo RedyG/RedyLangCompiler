@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class CallExpr : IExpr
     {
-        public Type Type => Func.Proto.ReturnType;
+        public IType Type => Func.Proto.ReturnType;
         public Func Func { get; }
         public List<IExpr> Args { get; } = new();
 
@@ -24,7 +24,7 @@ namespace Compiler.AST
             foreach (var arg in Args)
                 arg.CodeGen(func, funcs, symbols);
 
-            if (Type is Type.Struct @struct)
+            if (Type.ToConcrete() is IType.Struct @struct)
             {
                 func.LastBlock.Instructions.Add(Instruction.CreateAlloca(@struct.Size()));
             }

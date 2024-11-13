@@ -37,7 +37,7 @@ namespace Compiler.ParseTree
             var args = new List<(AST.Field Field, AST.IExpr Value)>();
             foreach (var namedArg in NamedArgs)
             {
-                if (type is AST.Type.Struct @struct)
+                if (type.ToConcrete() is AST.IType.Struct @struct)
                 {
                     var field = @struct.Fields.FirstOrDefault(f => f.Name == namedArg.identifier.Name);
                     if (field == null)

@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class IntExpr : IExpr
     {
-        public Type Type => new Type.I32();
+        public IType Type => new IType.I32();
         public long Value { get; set; }
 
         public IntExpr(long value)

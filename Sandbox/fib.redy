@@ -21,5 +21,5 @@ impl Person for Human {
 }
 
 pub fn get_average(h: Human) -> Human {
-	return h.get_age();
+	return Human { age: h.get_age(), height: 200 };
 }

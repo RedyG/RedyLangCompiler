@@ -22,9 +22,9 @@ namespace Compiler.ParseTree
             Right = right;
         }
 
-        private static AST.Type GetTypeAST(AST.Type left, BinOp binOp, AST.Type right) => (left, binOp, right) switch {
+        private static AST.IType GetTypeAST(AST.IType left, BinOp binOp, AST.IType right) => (left, binOp, right) switch {
             (var type, BinOp.Add or BinOp.Sub or BinOp.Mul or BinOp.Div, _) => type,
-            (_, BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge, _) => new AST.Type.Bool(),
+            (_, BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge, _) => new AST.IType.Bool(),
             (_, BinOp.Assign, var type) => type,
         };
 
@@ -38,7 +38,7 @@ namespace Compiler.ParseTree
 
 
                 if (Right is Identifier identifier) {
-                    if (leftExpr.Type.ToConcrete() is AST.Type.Struct @struct)
+                    if (leftExpr.Type.ToConcrete() is AST.IType.Struct @struct)
                     {
                         var field = @struct.Fields.FirstOrDefault(f => f.Name == identifier.Name);
                         if (field == null)

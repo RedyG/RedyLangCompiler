@@ -9,7 +9,7 @@ namespace Compiler.AST
 {
     public class AccessExpr : IExpr
     {
-        public Type Type { get; }
+        public IType Type { get; }
 
         public IExpr LValue { get; }
         public Field Field { get; }
@@ -27,10 +27,10 @@ namespace Compiler.AST
             LValue.CodeGen(func, funcs, symbols);
             switch (Field.Type)
             {
-                case Type.Bool:
+                case IType.Bool:
                     func.LastBlock.Instructions.Add(Instruction.CreateI8Load((int)Field.Offset()));
                     break;
-                case Type.I32:
+                case IType.I32:
                     func.LastBlock.Instructions.Add(Instruction.CreateI32Load((int)Field.Offset()));
                     break;
                 default:

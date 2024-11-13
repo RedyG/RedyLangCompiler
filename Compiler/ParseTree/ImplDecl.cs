@@ -22,7 +22,7 @@ namespace Compiler.ParseTree
             Funcs = funcs;
         }
 
-        public AST.Impl? ToAST(GlobalSymbols globals)
+        public AST.Impl? Register(GlobalSymbols globals, AST.ModuleFile module)
         {
             var type = Type.ToAST(this, globals, new());
             if (type == null)
@@ -38,12 +38,12 @@ namespace Compiler.ParseTree
                 return null;
             }
 
-            var funcs = Funcs.Select(func => func.ToAST(globals)).ToList();
+            var funcs = Funcs.Select(func => func.Register(globals, module)).ToList();
 
             if (funcs.Any(func => func == null))
                 return null;
 
-            return new AST.Impl(trait, type, funcs!);
+            return new AST.Impl(trait, type, funcs!, module);
         }
     }
 }

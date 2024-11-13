@@ -11,7 +11,7 @@ namespace Compiler.AST
         public List<ModuleFile> Modules { get; } = new();
         public List<Impl> Impls { get; } = new();
 
-        public Func? GetMethod(Type type, string name)
+        public Func? GetMethod(IType type, string name)
         {
             foreach (var impl in Impls)
             {
@@ -26,6 +26,11 @@ namespace Compiler.AST
             }
             return null;
         }
+
+        public List<Func> GetModuleMethods(ModuleFile module) => Impls
+            .Where(impl => impl.Module == module)
+            .SelectMany(impl => impl.Funcs)
+            .ToList();
 
         public Project()
         {

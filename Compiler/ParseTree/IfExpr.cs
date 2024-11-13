@@ -29,7 +29,7 @@ namespace Compiler.ParseTree
             var condition = Condition.ToAST(decl, globals, scopedSymbols);
             if (condition == null)
                 failed = true;
-            else if (condition.Type is not AST.Type.Bool)
+            else if (condition.Type is not AST.IType.Bool)
             {
                 Logger.MismatchedTypesIf(decl.ModuleFile, condition.Type, this);
                 failed = true;

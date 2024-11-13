@@ -8,11 +8,11 @@ namespace Compiler.AST
 {
     public class BlockExpr : IExpr
     {
-        public Type Type { get; }
+        public IType Type { get; }
         public List<IStatement> Statements { get; }
         public IExpr? LastExpr { get; }
 
-        public BlockExpr(Type type, List<IStatement> statements, IExpr? lastExpr)
+        public BlockExpr(IType type, List<IStatement> statements, IExpr? lastExpr)
         {
             Type = type;
             Statements = statements;

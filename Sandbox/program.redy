@@ -3,5 +3,5 @@ use fib::{Human, get_average};
 
 
 fn main() {
-    get_average(Human { age: 10, height: 200 }).age
+    get_average(Human { age: 32, height: 200 }).age
 }

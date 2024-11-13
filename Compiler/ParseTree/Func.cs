@@ -19,24 +19,30 @@ namespace Compiler.ParseTree
             Body = body;
         }
 
-        public AST.Func? ToAST(GlobalSymbols globals)
+        public AST.Func? Register(GlobalSymbols globals, AST.ModuleFile? moduleFile)
         {
-            if (globals.FuncsAST.TryGetValue(this, out var funcAST))
-                return funcAST;
+            if (globals.FuncsAST.TryGetValue(this, out var func))
+                return func;
 
+            var proto = Proto.Register(this, globals, moduleFile);
+            if (proto == null)
+                return null; 
+
+            func = new AST.Func(proto, null, Proto.Identifier.Name == "main");
+            globals.FuncsAST.Add(this, func);
+            return func;
+        }
+
+        public AST.Func? ToAST(GlobalSymbols globals, AST.Func func)
+        {
             var scopedSymbols = new ScopedSymbols();
-
-            var proto = Proto.ToAST(this, globals, scopedSymbols);
+            var proto = Proto.ToAST(this, globals, scopedSymbols, func.Proto);
             if (proto == null)
                 return null;
-
-            var func = new AST.Func(proto, null, Proto.Identifier.Name == "main");
-            globals.FuncsAST[this] = func;
 
             var body = Body.ToAST(this, globals, scopedSymbols);
             if (body == null)
                 return null;
-
             func.Body = body;
             return func;
         }

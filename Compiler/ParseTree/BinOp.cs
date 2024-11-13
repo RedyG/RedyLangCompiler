@@ -30,7 +30,7 @@ namespace Compiler.ParseTree
 
         public static int GetPrecedence(this BinOp binOp) => binOp switch
         {
-            BinOp.Access => 5,
+            BinOp.Access => 6,
             BinOp.Mul or BinOp.Div => 4,
             BinOp.Add or BinOp.Sub => 3,
             BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge => 2,

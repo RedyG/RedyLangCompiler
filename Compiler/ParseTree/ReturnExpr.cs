@@ -22,13 +22,13 @@ namespace Compiler.ParseTree
         {
             if (decl is Func func)
             {
-                var funcAST = func.ToAST(globals);
+                var funcAST = globals.FuncsAST[func];
                 if (funcAST == null)
                     return null;
 
                 if (Expr == null)
                 {
-                    if (funcAST.Proto.ReturnType is not AST.Type.Void)
+                    if (funcAST.Proto.ReturnType is not AST.IType.Void)
                     {
                         Logger.MismatchedTypesReturnVoid(func.Proto.ModuleFile, func, funcAST.Proto.ReturnType, this);
                         return null;

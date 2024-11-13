@@ -1,4 +1,4 @@
-﻿using Compiler.AST;
+﻿
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,8 @@ namespace Compiler.ParseTree
         public Dictionary<StringSegment, Func> UsedFuncs { get; } = new();
 
         public Dictionary<StringSegment, Module> UsedModules { get; } = new(); 
+
+        public List<ImplDecl> Impls { get; } = new();
 
         public void ResolveUseDecls()
         {
@@ -53,17 +55,69 @@ namespace Compiler.ParseTree
             resolved = true;
         }
 
-        private static List<AST.Func> ToAST(Dictionary<StringSegment, Func> funcs, GlobalSymbols globals) => funcs.Values
-            .Select(func => func.ToAST(globals))
-            .Where(func => func != null)
-            .ToList()!;
+        public AST.ModuleFile Register(GlobalSymbols globals)
+        {
+            if (globals.ModuleFiles.TryGetValue(this, out var moduleAST))
+                return moduleAST;
 
-        private List<AST.Type> ToAST(Dictionary<StringSegment, TypeDecl> typeDecls, GlobalSymbols globals) => typeDecls.Values
-            .Select(typeDecl => typeDecl.Type.ToAST(typeDecl, globals, new()))
-            .Where(typeDecl => typeDecl != null)
-            .ToList()!;
+            moduleAST = new AST.ModuleFile(FileName, [], [], [], globals.Project);
+            globals.ModuleFiles.Add(this, moduleAST);
 
-        public AST.ModuleFile ToAST(GlobalSymbols globals) => new AST.ModuleFile(FileName, ToAST(Funcs, globals), ToAST(UsedFuncs, globals), ToAST(TypeDecls, globals));
+            moduleAST.Funcs = Funcs.Values
+                .Select(func => func.Register(globals, moduleAST))
+                .Where(func => func != null)
+                .ToList()!;
+
+            moduleAST.ImportedFuncs = UsedFuncs.Values
+                .Select(func => func.Register(globals, moduleAST))
+                .Where(func => func != null)
+                .ToList()!;
+
+            moduleAST.Types = TypeDecls.Values
+                .Select(typeDecl => typeDecl.Type.ToAST(typeDecl, globals, new()))
+                .Where(typeDecl => typeDecl != null)
+                .ToList()!;
+
+            // impls
+            foreach (var impl in Impls)
+            {
+                var implAST = impl.Register(globals, moduleAST);
+                if (implAST != null)
+                    globals.Project.Impls.Add(implAST);
+            }
+
+            return moduleAST;
+        }
+
+        public void ToAST(GlobalSymbols globals, AST.ModuleFile moduleAST)
+        {
+            moduleAST.Funcs = moduleAST.Funcs.Select(funcAST => {
+                var func = Funcs[funcAST.Proto.Name]; // todo: maybe function overloading
+                var newFuncAST = func.ToAST(globals, funcAST);
+                if (newFuncAST == null)
+                    return null;
+                return newFuncAST;
+            }).ToList()!;
+
+            moduleAST.ImportedFuncs = moduleAST.ImportedFuncs.Select(funcAST => {
+                var func = UsedFuncs[funcAST.Proto.Name]; // todo: maybe function overloading
+                var newFuncAST = func.ToAST(globals, funcAST);
+                if (newFuncAST == null)
+                    return null;
+                return newFuncAST;
+            }).ToList()!;
+            
+            foreach (var impl in Impls)
+            {
+                foreach (var func in impl.Funcs)
+                {
+                    var funcAST = globals.FuncsAST[func];
+                    if (funcAST == null)
+                        continue;
+                    func.ToAST(globals, funcAST);
+                }
+            }
+        }
 
 
         public ModuleFile(Module module, string fileName)

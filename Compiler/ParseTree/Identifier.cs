@@ -1,16 +1,19 @@
 ﻿using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Compiler.ParseTree
 {
-    public struct Identifier : IExpr
+    public struct Identifier : IExpr, IEquatable<Identifier>
     {
         public TextRange Range { get; }
         public StringSegment Name { get; }
+
+
 
         public Identifier(TextRange range, StringSegment name)
         {
@@ -31,5 +34,12 @@ namespace Compiler.ParseTree
             }
 
         }
+
+        public override bool Equals([NotNullWhen(true)] object? obj) => obj is Identifier identifier && Equals(identifier);
+
+        public override int GetHashCode() => HashCode.Combine(Name);
+
+        public bool Equals(Identifier other) =>
+            Name == other.Name;
     }
 }

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Compiler.AST
 {
-    public class Field
+    public class Field : IEquatable<Field>
     {
-        public Type.Struct Struct { get; set; }
+        public IType.Struct Struct { get; set; }
         public string Name { get; set; }
-        public Type Type { get; set; }
+        public IType Type { get; set; }
 
-        public Field(string name, Type type, Type.Struct @struct)
+        public Field(string name, IType type, IType.Struct @struct)
         {
             Name = name;
             Type = type;
@@ -24,6 +24,18 @@ namespace Compiler.AST
             var fields = Struct.Fields;
             var index = fields.IndexOf(this);
             return (uint)fields.Take(index).Sum(f => f.Type.Size());
+        }
+
+        public override bool Equals(object? obj) => Equals(obj as Field);
+
+        public override int GetHashCode() => HashCode.Combine(Name, Type);
+
+        public bool Equals(Field? other)
+        {
+            if (other == null)
+                return false;
+
+            return Name == other.Name && Type == other.Type;
         }
     }
 }
