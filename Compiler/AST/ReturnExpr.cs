@@ -32,7 +32,11 @@ namespace Compiler.AST
                 func.LastBlock.Instructions.Add(Instruction.CreateMemCpyS(@struct.Size()));
 
                 func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)(func.ParamsCount - 1)));
+                func.LastBlock.BrInstruction = BrInstruction.CreateRet();
+                return;
             }
+
+            Value.CodeGen(func, funcs, symbols);
             func.LastBlock.BrInstruction = BrInstruction.CreateRet();
         }
     }

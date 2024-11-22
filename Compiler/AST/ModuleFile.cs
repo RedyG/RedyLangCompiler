@@ -22,7 +22,9 @@ namespace Compiler.AST
 
             List<ByteCode.Func> funcs = [
                 ..Funcs.Select(func => func.CodeGen(funcSymbols)),
-                ..Project.GetModuleMethods(this).Select(func => func.CodeGen(funcSymbols))
+                ..Project.GetModuleMethods(this).Select(func =>
+                func.CodeGen(funcSymbols)
+                )
             ];
 
             var module = new ByteCode.Module(FileName, importedFuncs, funcs);

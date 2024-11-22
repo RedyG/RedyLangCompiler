@@ -8,6 +8,7 @@ namespace Compiler.ByteCode
 {
     public class Module
     {
+        private const int ProtocolFuncSize = 12;
         public string FileName { get; set; }
         public List<Func> ImportedFuncs { get; } = new();
         public List<Func> Funcs { get; } = new();
@@ -28,14 +29,14 @@ namespace Compiler.ByteCode
 
             int funcsStart = list.Count;
 
-            list.AdvanceBy(Funcs.Count * 12);
+            list.AdvanceBy(Funcs.Count * ProtocolFuncSize);
 
             int funcOffset = 0;
 
             for (int i = 0; i < Funcs.Count; i++)
             {
                 var func = Funcs[i];
-                int start = i * 8 + funcsStart;
+                int start = i * ProtocolFuncSize + funcsStart;
 
                 list.WriteAt(start, (UInt16)func.ParamsCount);
                 list.WriteAt(start + 2, (UInt16)func.LocalsCount);
@@ -44,7 +45,7 @@ namespace Compiler.ByteCode
                 int previousCount = list.Count;
                 func.WriteTo(this, list);
                 int newCount = (list.Count - previousCount);
-                list.WriteAt(start + 4, (UInt32)newCount);
+                  list.WriteAt(start + 4, (UInt32)newCount);
                 funcOffset += newCount;
             }
 
