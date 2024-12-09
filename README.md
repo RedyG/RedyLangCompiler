@@ -59,4 +59,5 @@ fn fib(n: i32) -> i32 {
 * Move semantics
 * Iterators
 * More control flow
+* Optimization passes on AST and bytecode (function inlining, simplify branching, etc.)
 * Much, much more
