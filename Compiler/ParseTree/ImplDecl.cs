@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Compiler.AST;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,13 @@ namespace Compiler.ParseTree
 {
     public class ImplDecl : Decl
     {
-        public Type Trait { get; }
+        public Type? Trait { get; }
         public Type Type { get; } 
         public List<Func> Funcs { get; }
 
         public ModuleFile ModuleFile { get; }
 
-        public ImplDecl(ModuleFile moduleFile, Type trait, Type type, List<Func> funcs)
+        public ImplDecl(ModuleFile moduleFile, Type? trait, Type type, List<Func> funcs)
         {
             ModuleFile = moduleFile;
             Trait = trait;
@@ -31,11 +32,15 @@ namespace Compiler.ParseTree
                 return null;
             }
 
-            var trait = Trait.ToAST(this, globals, new());
-            if (trait == null)
+            IType? trait = null;
+            if (Trait != null)
             {
-                Logger.TypeNotFound(ModuleFile, ((Type.Identifier)Trait).Identifer);
-                return null;
+                trait = Trait.ToAST(this, globals, new());
+                if (trait == null)
+                {
+                    Logger.TypeNotFound(ModuleFile, ((Type.Identifier)Trait).Identifer);
+                    return null;
+                }
             }
 
             var funcs = Funcs.Select(func => func.Register(globals, module)).ToList();

@@ -9,6 +9,7 @@ namespace Compiler.ParseTree
     public enum BinOp
     {
         Access,
+        StaticAccess,
         Mul,
         Div,
         Add,
@@ -30,6 +31,7 @@ namespace Compiler.ParseTree
 
         public static int GetPrecedence(this BinOp binOp) => binOp switch
         {
+            BinOp.StaticAccess => 7,
             BinOp.Access => 6,
             BinOp.Mul or BinOp.Div => 4,
             BinOp.Add or BinOp.Sub => 3,
@@ -40,15 +42,12 @@ namespace Compiler.ParseTree
 
         public static string ToSentenceFormat(this BinOp binOp) => binOp switch
         {
-            BinOp.Access => "access",
+            BinOp.Access or BinOp.StaticAccess => "access",
             BinOp.Mul => "multiply",
             BinOp.Div => "divide",
             BinOp.Add => "add",
             BinOp.Sub => "subtract",
-            BinOp.Lt => "compare",
-            BinOp.Le => "compare",
-            BinOp.Gt => "compare",
-            BinOp.Ge => "compare",
+            BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge => "compare",
             BinOp.Assign => "assign"
         };
     }
@@ -58,6 +57,7 @@ namespace Compiler.ParseTree
         private static BinOp? GetBinOp(TokenType type) => type switch
         {
             TokenType.Dot => BinOp.Access,
+            TokenType.DoubleColon => BinOp.StaticAccess,
             TokenType.Add => BinOp.Add,
             TokenType.Sub => BinOp.Sub,
             TokenType.Mul => BinOp.Mul,

@@ -25,7 +25,7 @@ namespace Compiler.ParseTree
         private static AST.IType GetTypeAST(AST.IType left, BinOp binOp, AST.IType right) => (left, binOp, right) switch {
             (var type, BinOp.Add or BinOp.Sub or BinOp.Mul or BinOp.Div, _) => type,
             (_, BinOp.Lt or BinOp.Le or BinOp.Gt or BinOp.Ge, _) => new AST.IType.Bool(),
-            (_, BinOp.Assign, var type) => type,
+            (_, BinOp.Assign, _) => new AST.IType.Void(),
         };
 
         public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false)
@@ -37,7 +37,8 @@ namespace Compiler.ParseTree
                     return null;
 
 
-                if (Right is Identifier identifier) {
+                if (Right is Identifier identifier)
+                {
                     if (leftExpr.Type.ToConcrete() is AST.IType.Struct @struct)
                     {
                         var field = @struct.Fields.FirstOrDefault(f => f.Name == identifier.Name);
@@ -54,13 +55,38 @@ namespace Compiler.ParseTree
                 return null; // TODO: error this, just lazy rn
             }
 
+            if (OpNode.Op == BinOp.StaticAccess)
+            {
+                if (Left is Identifier identifier)
+                {
+                    var type = decl.ModuleFile.Module.GetType(identifier);
+                    if (type is not null)
+                    {
+                        if (Right is Identifier field)
+                        {
+                            var func = globals.Project.GetMethod(type.GetType(globals, scopedSymbols), field.Name.ToString());
+                            if (func == null)
+                            {
+                                Logger.MethodNotFound(decl.ModuleFile,type.GetType(globals, scopedSymbols), field);
+                                return null;
+                            }
+                            return new AST.FuncExpr(func.Proto.GetFuncPtrType(), func);
+                        }
+
+                        return null; // TODO: error
+                    }
+                }
+
+                return null; // TODO: modules
+            }
+                 
             var left = Left.ToAST(decl, globals, scopedSymbols);
             var right = Right.ToAST(decl, globals, scopedSymbols);
 
             if (left == null || right == null)
                 return null;
 
-            if (left.Type != right.Type)
+            if (!left.Type.Equals(right.Type))
             {
                 Logger.MismatchedTypesOp(decl.ModuleFile, left.Type, right.Type, OpNode);
                 return null;

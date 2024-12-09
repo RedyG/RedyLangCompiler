@@ -56,7 +56,7 @@ namespace Compiler.ParseTree
             if (@else == null || failed)
                 return null;
 
-            if (then!.Type != @else.Type)
+            if (!then!.Type.Equals(@else.Type))
             {
                 Logger.MismatchedTypesIfElse(decl.ModuleFile, then.Type, @else.Type, this);
                 return null;

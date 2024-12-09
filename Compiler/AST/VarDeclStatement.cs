@@ -11,6 +11,7 @@ namespace Compiler.AST
     {
         public IType Type { get; }
         public IExpr? Value { get; set; }
+        public List<RefExpr> Refs { get; set; } = new();
 
         public VarDeclStatement(IType type, IExpr? value = null)
         {
@@ -22,7 +23,15 @@ namespace Compiler.AST
         {
             if (Value != null)
             {
+                var alloca = Refs.Count > 0 && Value is not IType.Struct;
+                if (alloca)
+                    func.LastBlock.Instructions.Add(Instruction.CreateAlloca(Type.Size()));
+ 
                 Value.CodeGen(func, funcs, symbols);
+
+                if (alloca)
+                    func.LastBlock.Instructions.Add(Instruction.CreateStore(Type.Size(), 0));
+
                 func.LastBlock.Instructions.Add(Instruction.CreateLocalSet((UInt16)symbols.CurrentVarId));
             }
 

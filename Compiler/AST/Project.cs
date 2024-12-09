@@ -15,7 +15,7 @@ namespace Compiler.AST
         {
             foreach (var impl in Impls)
             {
-                if (impl.Type == type)
+                if (impl.Type.Equals(type))
                 {
                     foreach (var method in impl.Funcs)
                     {

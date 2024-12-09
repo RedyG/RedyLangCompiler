@@ -39,6 +39,14 @@ namespace Compiler.AST
             if (Main)
                 func.LastBlock.BrInstruction = ByteCode.BrInstruction.CreateExit();
 
+            if (func.LastBlock.BrInstruction == null)
+            {
+                if (Proto.ReturnType.IsEmpty)
+                    func.LastBlock.BrInstruction = ByteCode.BrInstruction.CreateRetVoid();
+                else
+                    func.LastBlock.BrInstruction = ByteCode.BrInstruction.CreateRet();
+            }
+
             return func;
         }
 

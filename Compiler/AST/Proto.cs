@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Compiler.ParseTree;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,12 @@ namespace Compiler.AST
         public IType ReturnType { get; set; }
         public List<Param> Params { get; set; } = new();
         public string Name;
+
+
+        public IType.FuncPtr GetFuncPtrType()
+        {
+            return new IType.FuncPtr(Params.Select(param => new VarDeclStatement(param.Type)).ToList(), ReturnType); // todo: default param values
+        }
 
         public Proto(IType returnType, string name)
         {

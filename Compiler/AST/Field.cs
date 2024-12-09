@@ -35,7 +35,7 @@ namespace Compiler.AST
             if (other == null)
                 return false;
 
-            return Name == other.Name && Type == other.Type;
+            return Name == other.Name && Type.Equals(other.Type);
         }
     }
 }

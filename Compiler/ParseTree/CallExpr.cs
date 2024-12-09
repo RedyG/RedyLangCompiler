@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Compiler.AST;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,32 +48,46 @@ namespace Compiler.ParseTree
 
                 return new AST.CallExpr(calleeAST, args);
             }
-            if (Callee is BinOpExpr binOpExpr && binOpExpr.OpNode.Op == BinOp.Access && binOpExpr.Right is Identifier method)
+            if (Callee is BinOpExpr binOpExpr)
             {
-                var self = binOpExpr.Left.ToAST(decl, globals, scopedSymbols);
-                if (self == null)
-                    return null;
-
-                var methodAST = globals.Project.GetMethod(self.Type, method.Name.ToString());
-                if (methodAST == null)
+                if (binOpExpr.OpNode.Op == BinOp.Access && binOpExpr.Right is Identifier method)
                 {
-                    Logger.MethodNotFound(decl.ModuleFile, self.Type, method);
-                    return null;
+                    var self = binOpExpr.Left.ToAST(decl, globals, scopedSymbols);
+                    if (self == null)
+                        return null;
+
+                    var methodAST = globals.Project.GetMethod(self.Type, method.Name.ToString());
+                    if (methodAST == null)
+                    {
+                        Logger.MethodNotFound(decl.ModuleFile, self.Type, method);
+                        return null;
+                    }
+
+                    if (methodAST.Proto.Params.Count != Args.Count + 1)
+                    {
+                        Logger.InvalidArgsCount(decl.ModuleFile, methodAST.Proto.Params.Count, this);
+                        return null;
+                    }
+
+
+                    List<AST.IExpr?> args = [self, .. Args.Select(arg => arg.ToAST(decl, globals, scopedSymbols))];
+
+                    if (args.Any(arg => arg == null))
+                        return null;
+
+                    return new AST.CallExpr(methodAST, args);
                 }
 
-                if (methodAST.Proto.Params.Count != Args.Count + 1)
+                if (binOpExpr.OpNode.Op == BinOp.StaticAccess)
                 {
-                    Logger.InvalidArgsCount(decl.ModuleFile, methodAST.Proto.Params.Count, this);
-                    return null;
+                    var expr = binOpExpr.ToAST(decl, globals, scopedSymbols);
+                    return expr switch
+                    {
+                        FuncExpr funcExpr => new AST.CallExpr(funcExpr.Func, Args.Select(arg => arg.ToAST(decl, globals, scopedSymbols)).ToList()),
+                        null => null,
+                        _ => throw new NotImplementedException()
+                    };
                 }
-
-
-                List<AST.IExpr?> args = [self, ..Args.Select(arg => arg.ToAST(decl, globals, scopedSymbols))];
-
-                if (args.Any(arg => arg == null))
-                    return null;
-
-                return new AST.CallExpr(methodAST, args);
             }
 
             return null; // for the moment

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Compiler.AST;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -19,10 +20,11 @@ namespace Compiler.ByteCode
         // Ret
         // RetVoid
         Pop = 0x08,
+        Dup,
         LocalGet, // u16
         LocalSet, // u16
 
-        I8Const = 0x0C, // i8
+        I8Const, // i8
         I16Const, // i16
         I32Const, // i32
         I64Const, // i64
@@ -201,10 +203,35 @@ namespace Compiler.ByteCode
         public static Instruction CreateI32Const(Int32 value) => new Instruction(OpCode.I32Const, value);
         public static Instruction CreateI64Const(Int64 value) => new Instruction(OpCode.I64Const, value);
 
+        public static Instruction CreateLoad(uint size, Int32 offset)
+        {
+            return size switch
+            {
+                1 => CreateI8Load(offset),
+                2 => CreateI16Load(offset),
+                4 => CreateI32Load(offset),
+                8 => CreateI64Load(offset),
+                _ => throw new InvalidInstructionException("Load")
+            };
+        }
         public static Instruction CreateI8Load(Int32 offset) => new Instruction(OpCode.I8Load, offset);
         public static Instruction CreateI16Load(Int32 offset) => new Instruction(OpCode.I16Load, offset);
         public static Instruction CreateI32Load(Int32 offset) => new Instruction(OpCode.I32Load, offset);
         public static Instruction CreateI64Load(Int32 offset) => new Instruction(OpCode.I64Load, offset);
+
+        public static Instruction CreateStore(uint size, Int32 offset)
+        {
+            return (offset, size) switch
+            {
+                (_, 1)  => CreateI8Store(offset),
+                (_, 2) => CreateI16Store(offset),
+                (_, 4)  => CreateI32Store(offset),
+                (_, 8) => CreateI64Store(offset),
+                (0, >8) => CreateMemCpyS(size),
+                (_, >8) => CreateMemCpy(offset, 0, size),
+                _ => throw new InvalidInstructionException("Store")
+            };
+        }
         public static Instruction CreateI8Store(Int32 offset) => new Instruction(OpCode.I8Store, offset);
         public static Instruction CreateI16Store(Int32 offset) => new Instruction(OpCode.I16Store, offset);
         public static Instruction CreateI32Store(Int32 offset) => new Instruction(OpCode.I32Store, offset);

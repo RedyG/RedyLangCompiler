@@ -42,11 +42,24 @@ namespace Compiler.AST
         {
             if (Op == BinOp.Assign)
             {
-                if (Left is not VarUseExpr)
-                    throw new Exception("Left expression of an assignment should be a variable for the moment.");
-
-                Right.CodeGen(func, funcs, symbols);
-                func.LastBlock.Instructions.Add(Instruction.CreateLocalSet((UInt16)symbols.VarIds[((VarUseExpr)Left).Var]));
+                if (Left is VarUseExpr varUse)
+                {
+                    Right.CodeGen(func, funcs, symbols);
+                    func.LastBlock.Instructions.Add(Instruction.CreateLocalSet((UInt16)symbols.VarIds[((VarUseExpr)Left).Var]));
+                }
+                else if (Left is DeRefExpr deRef)
+                {
+                    deRef.Expr.CodeGen(func, funcs, symbols);
+                    Right.CodeGen(func, funcs, symbols);
+                    func.LastBlock.Instructions.Add(Instruction.CreateStore(deRef.Type.Size(), 0));
+                    func.LastBlock.Instructions.Add(new Instruction(OpCode.Pop));
+                }
+                else if (Left is AccessExpr access)
+                {
+                    access.LValue.CodeGen(func, funcs, symbols);
+                    Right.CodeGen(func, funcs, symbols);
+                    func.LastBlock.Instructions.Add(Instruction.CreateMemCpy((Int32)access.Field.Offset(), 0, access.Field.Type.Size())); 
+                }
                 return;
             }
 

@@ -50,6 +50,7 @@ namespace Compiler
         Gt,
         Ge,
         Assign,
+        Amp,
 
 
         Identifier,
@@ -103,6 +104,7 @@ namespace Compiler
             TokenType.Gt => ">",
             TokenType.Ge => ">=",
             TokenType.Assign => "=",
+            TokenType.Amp => "&",
             TokenType.Identifier => "Identifier",
             TokenType.IntLiteral => "IntLiteral",
         };
@@ -198,6 +200,9 @@ namespace Compiler
             FileName = fileName;
         }
 
+        private static bool StartsWithKeyword(StringSegment input, string keyword)
+            => input.StartsWith(keyword, StringComparison.CurrentCulture) && char.IsWhiteSpace(input[keyword.Length]);
+
         public Token Consume()
         {
             if (_token.Range.End.Pos >= Input.Length)
@@ -261,35 +266,37 @@ namespace Compiler
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Gt, _token.Range.End);
                 case '=':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Assign, _token.Range.End);
+                case '&':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Amp, _token.Range.End);
             }
 
-            if (trimmedInput.StartsWith("fn", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "fn"))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.Fn, _token.Range.End);
-            if (trimmedInput.StartsWith("pub", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "pub"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Pub, _token.Range.End);
-            if (trimmedInput.StartsWith("type", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "type"))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Type, _token.Range.End);
-            if (trimmedInput.StartsWith("alias", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "alias"))
                 return _token = new Token(trimmedInput.Subsegment(0, 5), TokenType.Alias, _token.Range.End);
-            if (trimmedInput.StartsWith("struct", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "struct"))
                 return _token = new Token(trimmedInput.Subsegment(0, 6), TokenType.Struct, _token.Range.End);
-            if (trimmedInput.StartsWith("trait", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "trait"))
                 return _token = new Token(trimmedInput.Subsegment(0, 5), TokenType.Trait, _token.Range.End);
-            if (trimmedInput.StartsWith("impl", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "impl"))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Impl, _token.Range.End);
-            if (trimmedInput.StartsWith("for", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "for"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.For, _token.Range.End);
-            if (trimmedInput.StartsWith("use", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "use"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Use, _token.Range.End);
-            if (trimmedInput.StartsWith("mod", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "mod"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Mod, _token.Range.End);
-            if (trimmedInput.StartsWith("if", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "if"))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.If, _token.Range.End);
-            if (trimmedInput.StartsWith("else", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "else"))
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Else, _token.Range.End);
-            if (trimmedInput.StartsWith("return", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "return"))
                 return _token = new Token(trimmedInput.Subsegment(0, 6), TokenType.Return, _token.Range.End);
-            if (trimmedInput.StartsWith("var", StringComparison.CurrentCulture))
+            if (StartsWithKeyword(trimmedInput, "var"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Var, _token.Range.End);
             if (trimmedInput.StartsWith("<=", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.Le, _token.Range.End);

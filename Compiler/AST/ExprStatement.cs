@@ -19,7 +19,7 @@ namespace Compiler.AST
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             Expr.CodeGen(func, funcs, symbols);
-            if (!Expr.Type.IsEmpty)
+            if (!Expr.Type.IsEmpty && !(Expr is BinOpExpr binOp && binOp.Op == ParseTree.BinOp.Access))
                 func.LastBlock.Instructions.Add(new Instruction(OpCode.Pop));
         }
     }

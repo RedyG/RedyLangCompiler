@@ -24,5 +24,11 @@ namespace Compiler.ParseTree
             IsAlias = isAlias;
         }
 
+        public AST.IType? GetType(GlobalSymbols globals, ScopedSymbols scopedSymbols)
+        {
+            var type = Type.ToAST(this, globals, scopedSymbols);
+            return IsAlias ? type : new AST.IType.Identifier { Name = Identifier.Name.ToString(), Type = type };
+        }
+
     }
 }

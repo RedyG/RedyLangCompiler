@@ -47,6 +47,10 @@ namespace Compiler.ByteCode
                 {
                     list.Add(BrInstruction.Ret);
                 }
+                else if (block.BrInstruction.Value.OpCode == BrOpCode.RetVoid)
+                {
+                    list.Add(BrInstruction.RetVoid);
+                }
                 else if (block.BrInstruction.Value.OpCode == BrOpCode.Exit)
                 {
                     list.Add(BrInstruction.Exit);

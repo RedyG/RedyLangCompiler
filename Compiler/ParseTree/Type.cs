@@ -27,6 +27,7 @@ namespace Compiler.ParseTree
             }
         }
         public record FuncPtr(List<VarDeclStatement> Params, Type ReturnType) : Type;
+        public record Ref(Type Type, TextRange Range) : Type;
 
         public AST.IType? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols)
         {
@@ -85,6 +86,12 @@ namespace Compiler.ParseTree
                         return null;
 
                     return traitAST;
+                case Ref r:
+                    var type = r.Type.ToAST(decl, globals, scopedSymbols);
+                    if (type == null)
+                        return null;
+
+                    return new AST.IType.Ref(type);
                 default:
                     return null;
             }
@@ -96,6 +103,7 @@ namespace Compiler.ParseTree
             Struct s => s.Range,
             Identifier i => i.Identifer.Range,
             Trait t => t.Range,
+            Ref r => r.Range,
             _ => throw new NotImplementedException()
         };
     }

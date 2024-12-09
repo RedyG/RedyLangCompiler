@@ -127,7 +127,7 @@ namespace Compiler
                         {
                             var argIdentifier = ParseIdentifier();
                             if (lexer.Token.Type != TokenType.Colon)
-                                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Assign });
+                                Logger.UnexpectedToken(lexer, [TokenType.Assign]);
                             lexer.Consume();
                             var argExpr = ParseExpr(moduleFile);
                             namedArgs.Add(new NamedArg(argIdentifier, argExpr));
@@ -139,7 +139,7 @@ namespace Compiler
                             }
 
                             if (lexer.Token.Type != TokenType.RCurly)
-                                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RCurly });
+                                Logger.UnexpectedToken(lexer, [TokenType.Comma, TokenType.RCurly]);
                         }
 
                         var end = lexer.Token.Range.End;
@@ -153,7 +153,7 @@ namespace Compiler
                         lexer.Consume();
                     var expr = ParseExpr(moduleFile);
                     if (lexer.Token.Type != TokenType.RParen)
-                        Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.RParen });
+                        Logger.UnexpectedToken(lexer, [TokenType.RParen]);
                     var parenExpr = new ParenExpr(new TextRange(start, lexer.Token.Range.End), expr);
                     lexer.Consume();
                     return parenExpr;
@@ -165,7 +165,7 @@ namespace Compiler
                 case TokenType.Return:
                     return ParseReturn(moduleFile);
                 default:
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.IntLiteral, TokenType.Identifier, TokenType.LParen, TokenType.LCurly, TokenType.If, TokenType.Return });
+                    Logger.UnexpectedToken(lexer, [TokenType.IntLiteral, TokenType.Identifier, TokenType.LParen, TokenType.LCurly, TokenType.If, TokenType.Return]);
                     throw new Exception(); // TODO: idk how to handle this
             }
         }
@@ -180,9 +180,12 @@ namespace Compiler
                 args.Add(ParseExpr(moduleFile));
                 if (lexer.Token.Type is not TokenType.Comma and not TokenType.RParen)
                 {
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RParen });
+                    Logger.UnexpectedToken(lexer, [TokenType.Comma, TokenType.RParen]);
                     break;
                 }
+
+                if (lexer.Token.Type is TokenType.Comma)
+                    lexer.Consume();
             }
 
             var end = lexer.Token.Range.End;
@@ -192,6 +195,22 @@ namespace Compiler
 
         private IExpr ParseUnary(ModuleFile moduleFile)
         {
+            if (lexer.Token.Type == TokenType.Amp)
+            {
+                var start = lexer.Token.Range.Start;
+                lexer.Consume();
+                var expr = ParsePrimary(moduleFile);
+                return new RefExpr(new TextRange(start, expr.Range.End), expr);
+            }
+
+            if (lexer.Token.Type == TokenType.Mul)
+            {
+                var start = lexer.Token.Range.Start;
+                lexer.Consume();
+                var expr = ParsePrimary(moduleFile);
+                return new DeRefExpr(new TextRange(start, expr.Range.End), expr);
+            }
+
             return ParsePrimary(moduleFile);
         }
 
@@ -334,6 +353,14 @@ namespace Compiler
 
         private ParseTree.Type ParseType(ModuleFile moduleFile)
         {
+            if (lexer.Token.Type == TokenType.Amp)
+            {
+                var start = lexer.Token.Range.Start;
+                lexer.Consume();
+                var type = ParseType(moduleFile);
+                return new ParseTree.Type.Ref(type, new TextRange(start, type.GetRange().End));
+            }
+
             if (lexer.Token.Type == TokenType.Struct)
                 return ParseStruct(moduleFile);
 
@@ -371,16 +398,19 @@ namespace Compiler
 
             var @params = new List<Param>();
             if (lexer.Token.Type != TokenType.LParen)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LParen });
+                Logger.UnexpectedToken(lexer, [TokenType.LParen]);
             lexer.Consume();
             while (lexer.Token.Type != TokenType.RParen)
             {
                 @params.Add(ParseParam(moduleFile));
                 if (lexer.Token.Type is not TokenType.Comma and not TokenType.RParen)
                 {
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RParen });
+                    Logger.UnexpectedToken(lexer, [TokenType.Comma, TokenType.RParen]);
                     break;
                 }
+
+                if (lexer.Token.Type is TokenType.Comma)
+                    lexer.Consume();
             }
             lexer.Consume(); // consume rparen
 
@@ -466,12 +496,16 @@ namespace Compiler
         {
             lexer.Consume();
             var trait = ParseType(moduleFile);
-            if (lexer.Token.Type != TokenType.For)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.For });
-            lexer.Consume();
-            var type = ParseType(moduleFile);
+            ParseTree.Type? type = null;
             if (lexer.Token.Type != TokenType.LCurly)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+            {
+                if (lexer.Token.Type != TokenType.For)
+                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.For });
+                lexer.Consume();
+                type = ParseType(moduleFile);
+                if (lexer.Token.Type != TokenType.LCurly)
+                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+            }
             lexer.Consume();
 
             var funcs = new List<Func>();
@@ -482,7 +516,7 @@ namespace Compiler
             }
 
             lexer.Consume();
-            return new ImplDecl(moduleFile, trait, type, funcs);
+            return new ImplDecl(moduleFile, type != null ? trait : null, type != null ? type : trait, funcs);
         }
 
         private VisibilityNode ParseVisiblity()

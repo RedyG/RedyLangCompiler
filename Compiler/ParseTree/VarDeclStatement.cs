@@ -62,7 +62,7 @@ namespace Compiler.ParseTree
                 if (type == null)
                     type = value.Type;
 
-                if (type != value.Type)
+                if (!type.Equals(value.Type))
                 {
                     Logger.MismatchedTypesVarDecl(decl.ModuleFile, (AST.IType)type, (AST.IType)value.Type, this);
                     return null;

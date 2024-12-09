@@ -25,17 +25,7 @@ namespace Compiler.AST
             foreach (var (field, value) in Args)
             {
                 value.CodeGen(func, funcs, symbols);
-                switch (field.Type)
-                {
-                    case IType.I32:
-                        func.LastBlock.Instructions.Add(Instruction.CreateI32Store((int)field.Offset()));
-                        break;
-                    case IType.Bool:
-                        func.LastBlock.Instructions.Add(Instruction.CreateI8Store((int)field.Offset()));
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                func.LastBlock.Instructions.Add(Instruction.CreateStore(value.Type.Size(), (Int32)field.Offset()));
             }
         }
     }

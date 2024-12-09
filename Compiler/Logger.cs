@@ -96,7 +96,7 @@ namespace Compiler
                     if (isCause)
                         Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write(new string('\t', tabsCount) + new string(' ', underline.Range.Start.Col - 1 - tabsCount));
-                    Console.Write(new string(isCause ? '^' : '-', underline.Range.End.Col - underline.Range.Start.Col));
+                    Console.Write(new string(isCause ? '^' : '-', Math.Max(underline.Range.End.Col - underline.Range.Start.Col, 0)));
                     Console.Write(' ');
                     Console.WriteLine(underline.Text);
                 }   
@@ -125,7 +125,7 @@ namespace Compiler
 
         public static void MismatchedTypesOp(ModuleFile moduleFile, AST.IType expected, AST.IType found, BinOpNode opNode)
         {
-            Error(new Log(moduleFile, "mismatched types", new(opNode.Range, $"cannot ${opNode.Op.ToSentenceFormat()} the type `${found} to the type `${expected}`")));
+            Error(new Log(moduleFile, "mismatched types", new(opNode.Range, $"cannot {opNode.Op.ToSentenceFormat()} the type `{found}` to the type `{expected}`")));
         }
 
         public static void MismatchedTypesVarDecl(ModuleFile moduleFile, AST.IType expected, AST.IType found, VarDeclStatement varDecl)
@@ -189,6 +189,11 @@ namespace Compiler
         public static void ExpectedTypeOrValueVarDecl(ModuleFile moduleFile, VarDeclStatement varDecl)
         {
             Error(new Log(moduleFile, "expected type or value", new(varDecl.Range, "expected either a type or a value, found neither")));
+        }
+
+        public static void ExpectedRefType(ModuleFile moduleFile, AST.IType type, IExpr expr)
+        {
+            Error(new Log(moduleFile, "expected reference type", new(expr.Range, $"expected a reference type, found `{type}`")));
         }
 
         public static void InvalidStructField(ModuleFile moduleFile, AST.IType type, Identifier fieldIdentifier)

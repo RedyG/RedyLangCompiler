@@ -1,7 +1,12 @@
 mod test;
-use fib::{Human, get_average};
 
 
 fn main() {
-    get_average(Human { age: 32, height: 200 }).age
+  var a = 0;
+  modify(&a);
+  a
+}
+
+fn modify(a: &i32) {
+  *a = 10;
 }

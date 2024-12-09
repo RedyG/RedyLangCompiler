@@ -100,12 +100,29 @@ namespace Compiler.AST
             public string Name { get; set; }
             public IType Type { get; set; }
 
-            public bool Equals(IType? other) => object.ReferenceEquals(this, other);
+            public bool Equals(IType? other) => other is Identifier identifier && Type.Equals(identifier.Type) && Name == identifier.Name;
 
             public bool IsEmpty => Type.IsEmpty;
             public uint Size() => Type.Size();
             public IType ToConcrete() => Type;
             public override string ToString() => Name;
+        }
+
+        public class Ref : IType
+        {
+            public IType Type { get; set; }
+
+            public bool Equals(IType? other) => other is Ref r && Type.Equals(r.Type);
+
+            public Ref(IType type)
+            {
+                Type = type;
+            }
+
+            public bool IsEmpty => false;
+            public uint Size() => 8;
+            public IType ToConcrete() => this;
+            public override string ToString() => $"&{Type}";
         }
         public class Void : IType
         {
