@@ -74,7 +74,7 @@ namespace Compiler
             var start = lexer.Token.Range.Start;
             lexer.Consume();
 
-            var condition = ParseExpr(moduleFile);
+            var condition = ParseExpr(moduleFile, 1, true);
 
             if (lexer.Token.Type != TokenType.LCurly)
             {
@@ -98,7 +98,7 @@ namespace Compiler
             var start = lexer.Token.Range.Start;
             lexer.Consume();
 
-            var condition = ParseExpr(moduleFile);
+            var condition = ParseExpr(moduleFile, 1, true);
 
             if (lexer.Token.Type != TokenType.LCurly)
             {
@@ -124,7 +124,7 @@ namespace Compiler
             return new ReturnExpr(new TextRange(returnRange.Start, expr.Range.End), expr);
         }
 
-        private IExpr ParsePrimary(ModuleFile moduleFile)
+        private IExpr ParsePrimary(ModuleFile moduleFile, bool isCond = false)
         {
             switch (lexer.Token.Type)
             {
@@ -135,7 +135,7 @@ namespace Compiler
                 case TokenType.Identifier:
                     {
                         var identifier = ParseIdentifier();
-                        if (lexer.Token.Type != TokenType.LCurly)
+                        if (lexer.Token.Type != TokenType.LCurly || isCond)
                             return identifier;
 
                         lexer.Consume();
@@ -145,7 +145,7 @@ namespace Compiler
                         {
                             var argIdentifier = ParseIdentifier();
                             if (lexer.Token.Type != TokenType.Colon)
-                                Logger.UnexpectedToken(lexer, [TokenType.Assign]);
+                                Logger.UnexpectedToken(lexer, [TokenType.Colon]);
                             lexer.Consume();
                             var argExpr = ParseExpr(moduleFile);
                             namedArgs.Add(new NamedArg(argIdentifier, argExpr));
@@ -213,7 +213,7 @@ namespace Compiler
             return new CallExpr(new TextRange(expr.Range.Start, end), expr, args);
         }
 
-        private IExpr ParseUnary(ModuleFile moduleFile)
+        private IExpr ParseUnary(ModuleFile moduleFile, bool isCond = false)
         {
             if (lexer.Token.Type == TokenType.Amp)
             {
@@ -231,7 +231,7 @@ namespace Compiler
                 return new DeRefExpr(new TextRange(start, expr.Range.End), expr);
             }
 
-            return ParsePrimary(moduleFile);
+            return ParsePrimary(moduleFile, isCond);
         }
 
         private VarDeclStatement ParseVarDecl(ModuleFile moduleFile)
@@ -262,12 +262,12 @@ namespace Compiler
             return new VarDeclStatement(new TextRange(start, end), type, identifier, value);
         }
 
-        private Item ParseItem(ModuleFile moduleFile, int precedence = 1)
+        private Item ParseItem(ModuleFile moduleFile, int precedence = 1, bool isCond = false)
         {
             if (lexer.Token.Type == TokenType.Var)
                 return new Item(ParseVarDecl(moduleFile));
 
-            var expr = ParseUnary(moduleFile);
+            var expr = ParseUnary(moduleFile, isCond);
             while (true)
             {
                 if (lexer.Token.Type == TokenType.LParen) // todo abstract other postfix
@@ -299,7 +299,7 @@ namespace Compiler
             return new Item(expr);
         }
 
-        private IExpr ParseExpr(ModuleFile moduleFile, int precedence = 1) => ParseItem(moduleFile, precedence) switch
+        private IExpr ParseExpr(ModuleFile moduleFile, int precedence = 1, bool isCond = false) => ParseItem(moduleFile, precedence, isCond) switch
         {
             Item { Expr: var expr, Statement: null } => expr!,
             _ => throw new NotImplementedException()
