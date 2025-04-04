@@ -10,7 +10,8 @@ namespace Compiler.AST
     {
         public bool IsEmpty { get; }
         public uint Size();
-        public IType ToConcrete();
+        public IType ToConcrete() => this;
+        public IType DeRef() => this;
 
         public class Struct : IType
         {
@@ -33,7 +34,6 @@ namespace Compiler.AST
             public override int GetHashCode() => Fields.GetHashCode();
 
             public uint Size() => (uint)Fields.Sum(field => field.Type.Size());
-            public IType ToConcrete() => this;
             public override string ToString() => $"struct {{\n{string.Join(",\n", Fields.Select(field => $"{field.Name}: {field.Type}"))}}}";
         }
 
@@ -66,7 +66,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => false;
             public uint Size() => 8;
-            public IType ToConcrete() => this;
             public override string ToString() => $"fn({string.Join(", ", Params.Select(param => param.Type.ToString()))}) -> {ReturnType}";
         }
         public class Trait : IType
@@ -91,7 +90,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => false;
             public uint Size() => 16;
-            public IType ToConcrete() => this;
             public override string ToString() => $"trait {{\n{string.Join(",\n", Funcs.Select(func => func.ToString()))}}}";
         }
 
@@ -121,7 +119,7 @@ namespace Compiler.AST
 
             public bool IsEmpty => false;
             public uint Size() => 8;
-            public IType ToConcrete() => this;
+            public IType DeRef() => Type;
             public override string ToString() => $"&{Type}";
         }
         public class Void : IType
@@ -130,7 +128,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => true;
             public uint Size() => 0;
-            public IType ToConcrete() => this;
             public override string ToString() => "void";
         }
 
@@ -140,7 +137,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => true;
             public uint Size() => 0;
-            public IType ToConcrete() => this;
             public override string ToString() => "never";
         }
 
@@ -150,7 +146,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => false;
             public uint Size() => 4;
-            public IType ToConcrete() => this;
             public override string ToString() => "i32";
         }
 
@@ -160,7 +155,6 @@ namespace Compiler.AST
 
             public bool IsEmpty => false;
             public uint Size() => 1;
-            public IType ToConcrete() => this;
             public override string ToString() => "bool";
         }
     }

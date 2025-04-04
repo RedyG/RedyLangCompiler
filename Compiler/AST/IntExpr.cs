@@ -19,16 +19,7 @@ namespace Compiler.AST
 
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
-            if (Value < sbyte.MaxValue)
-                func.LastBlock.Instructions.Add(Instruction.CreateI8Const((sbyte)Value));
-            else if (Value < Int16.MaxValue)
-                func.LastBlock.Instructions.Add(Instruction.CreateI16Const((Int16)Value));
-            else if (Value < Int32.MaxValue)
-                func.LastBlock.Instructions.Add(Instruction.CreateI32Const((Int32)Value));
-            else if (Value < Int64.MaxValue)
-                func.LastBlock.Instructions.Add(Instruction.CreateI64Const((Int64)Value));
-            else
-                throw new ArgumentOutOfRangeException();
+            func.LastBlock.Instructions.Add(Instruction.CreateConst(Value));
         }
     }
 }

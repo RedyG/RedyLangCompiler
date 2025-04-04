@@ -198,6 +198,16 @@ namespace Compiler.ByteCode
         public static Instruction CreateCall(Func func) => new Instruction(OpCode.Call, func);
         public static Instruction CreateLocalGet(UInt16 id) => new Instruction(OpCode.LocalGet, id);
         public static Instruction CreateLocalSet(UInt16 id) => new Instruction(OpCode.LocalSet, id);
+
+        public static Instruction CreateConst(Int64 value) => value switch
+        {
+            < sbyte.MaxValue => CreateI8Const((sbyte)value),
+            < Int16.MaxValue => CreateI16Const((Int16)value),
+            < Int32.MaxValue => CreateI32Const((Int32)value),
+            < Int64.MaxValue => CreateI64Const(value),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
         public static Instruction CreateI8Const(sbyte value) => new Instruction(OpCode.I8Const, value);
         public static Instruction CreateI16Const(Int16 value) => new Instruction(OpCode.I16Const, value);
         public static Instruction CreateI32Const(Int32 value) => new Instruction(OpCode.I32Const, value);

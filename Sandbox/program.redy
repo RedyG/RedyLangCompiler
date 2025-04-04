@@ -1,12 +1,16 @@
 mod test;
 
+type Person = struct {
+  age: i32,
+  height: i32,
+};
 
 fn main() {
-  var a = 0;
-  modify(&a);
-  a
+  var person = Person { age: 20, height: 200 };
+  modify(&person.height);
+  person.height
 }
 
 fn modify(a: &i32) {
-  *a = 10;
+  *a = 10
 }

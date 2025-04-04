@@ -39,7 +39,7 @@ namespace Compiler.ParseTree
 
                 if (Right is Identifier identifier)
                 {
-                    if (leftExpr.Type.ToConcrete() is AST.IType.Struct @struct)
+                    if (leftExpr.Type.DeRef().ToConcrete() is AST.IType.Struct @struct)
                     {
                         var field = @struct.Fields.FirstOrDefault(f => f.Name == identifier.Name);
                         if (field == null)
@@ -52,7 +52,8 @@ namespace Compiler.ParseTree
                     }
                 }
 
-                return null; // TODO: error this, just lazy rn
+                Logger.InvalidMemberAccess(decl.ModuleFile, this);
+                return null;
             }
 
             if (OpNode.Op == BinOp.StaticAccess)

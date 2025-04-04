@@ -200,6 +200,11 @@ namespace Compiler
         {
             Error(new Log(moduleFile, $"invalid field `{fieldIdentifier.Name}`", new(fieldIdentifier.Range, $"field `{fieldIdentifier.Name}` does not exist in the struct `{type}`")));
         }
+
+        public static void InvalidMemberAccess(ModuleFile moduleFile, BinOpExpr binOpExpr)
+        {
+            Error(new Log(moduleFile, "invalid member access", new(binOpExpr.Right.Range, "expected an identifier")));
+        }
     }
 }
 

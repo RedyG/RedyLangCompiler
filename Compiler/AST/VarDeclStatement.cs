@@ -23,7 +23,7 @@ namespace Compiler.AST
         {
             if (Value != null)
             {
-                var alloca = Refs.Count > 0 && Value is not IType.Struct;
+                var alloca = Refs.Count > 0 && Value.Type.ToConcrete() is not IType.Struct;
                 if (alloca)
                     func.LastBlock.Instructions.Add(Instruction.CreateAlloca(Type.Size()));
  

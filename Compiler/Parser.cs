@@ -199,7 +199,7 @@ namespace Compiler
             {
                 var start = lexer.Token.Range.Start;
                 lexer.Consume();
-                var expr = ParsePrimary(moduleFile);
+                var expr = ParseExpr(moduleFile, 5);
                 return new RefExpr(new TextRange(start, expr.Range.End), expr);
             }
 
@@ -207,7 +207,7 @@ namespace Compiler
             {
                 var start = lexer.Token.Range.Start;
                 lexer.Consume();
-                var expr = ParsePrimary(moduleFile);
+                var expr = ParseExpr(moduleFile, 5);
                 return new DeRefExpr(new TextRange(start, expr.Range.End), expr);
             }
 
@@ -252,7 +252,7 @@ namespace Compiler
             {
                 if (lexer.Token.Type == TokenType.LParen) // todo abstract other postfix
                 {
-                    var opPrecedence = 5;
+                    var opPrecedence = 6;
                     if (opPrecedence < precedence)
                         break;
 
@@ -289,7 +289,7 @@ namespace Compiler
         {
             lexer.Consume();
             if (lexer.Token.Type != TokenType.LCurly)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
 
             var start = lexer.Token.Range.Start;
             lexer.Consume();
@@ -300,7 +300,7 @@ namespace Compiler
                 var visiblity = ParseVisiblity();
                 var identifier = ParseIdentifier();
                 if (lexer.Token.Type != TokenType.Colon)
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Colon });
+                    Logger.UnexpectedToken(lexer, [TokenType.Colon]);
                 lexer.Consume();
                 var type = ParseType(moduleFile);
                 fields.Add(new Field(visiblity, new VarDeclStatement(new TextRange(identifier.Range.Start, type.GetRange().End), type, identifier)));
@@ -310,7 +310,7 @@ namespace Compiler
                     continue;
                 }
                 if (lexer.Token.Type != TokenType.RCurly)
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Comma, TokenType.RCurly });
+                    Logger.UnexpectedToken(lexer, [TokenType.Comma, TokenType.RCurly]);
             }
 
             var @struct = new ParseTree.Type.Struct(fields, new TextRange(start, lexer.Token.Range.End));
@@ -322,7 +322,7 @@ namespace Compiler
         {
             lexer.Consume();
             if (lexer.Token.Type != TokenType.LCurly)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
 
             var start = lexer.Token.Range.Start;
             lexer.Consume();

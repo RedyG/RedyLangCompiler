@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Compiler.ByteCode;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Compiler.AST
 
         public RefExpr(IType.Ref type, IExpr expr)
         {
+            Type = type;
             Expr = expr;
         }
 
@@ -23,6 +25,16 @@ namespace Compiler.AST
             {
                 varUse.CodeGen(func, funcs, symbols);
                 func.LastBlock.Instructions.Pop(); // remove the load instruction, we want the ref
+                return;
+            }
+
+            if (Expr is AccessExpr access)
+            {
+                access.LValue.CodeGen(func, funcs, symbols);
+                if (access.Field.Offset() != 0) {
+                    func.LastBlock.Instructions.Add(Instruction.CreateConst(access.Field.Offset()));
+                    func.LastBlock.Instructions.Add(new Instruction(OpCode.I64Add));
+                }
                 return;
             }
 

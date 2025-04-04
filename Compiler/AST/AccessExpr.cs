@@ -25,17 +25,7 @@ namespace Compiler.AST
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             LValue.CodeGen(func, funcs, symbols);
-            switch (Field.Type)
-            {
-                case IType.Bool:
-                    func.LastBlock.Instructions.Add(Instruction.CreateI8Load((int)Field.Offset()));
-                    break;
-                case IType.I32:
-                    func.LastBlock.Instructions.Add(Instruction.CreateI32Load((int)Field.Offset()));
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+            func.LastBlock.Instructions.Add(Instruction.CreateLoad(Field.Type.Size(), (Int32)Field.Offset()));
         }
     }
 }
