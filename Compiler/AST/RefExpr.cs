@@ -38,7 +38,7 @@ namespace Compiler.AST
                 return;
             }
 
-            throw new Exception("you can only ref vars at the moment"); // TODO: support access to struct fields
+            throw new NotImplementedException($"RefExpr.CodeGen not implemented for {Expr.GetType()}");
         }
     }
 }

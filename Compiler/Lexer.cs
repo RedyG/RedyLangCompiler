@@ -20,6 +20,7 @@ namespace Compiler
         Trait,
         Impl,
         For,
+        While,
         Use,
         Mod,
         Fn,
@@ -59,14 +60,9 @@ namespace Compiler
 
     public static class TokenTypeExtensions
     {
-        public static bool IsModuleItem(this TokenType type) => type switch
-        {
-            TokenType.Fn => true,
-            TokenType.Type => true,
-            TokenType.Alias => true,
-            TokenType.Use => true,
-            _ => false,
-        };
+        public static bool IsModuleItem(this TokenType type) => type
+            is TokenType.Fn or TokenType.Type or TokenType.Alias or TokenType.Use
+            or TokenType.Mod or TokenType.Struct or TokenType.Trait or TokenType.Impl;
 
         public static string ToFormat(this TokenType type) => type switch
         {
@@ -78,6 +74,7 @@ namespace Compiler
             TokenType.Trait => "trait",
             TokenType.Impl => "impl",
             TokenType.For => "for",
+            TokenType.While => "while",
             TokenType.Use => "use",
             TokenType.Mod => "mod",
             TokenType.Fn => "fn",
@@ -286,6 +283,8 @@ namespace Compiler
                 return _token = new Token(trimmedInput.Subsegment(0, 4), TokenType.Impl, _token.Range.End);
             if (StartsWithKeyword(trimmedInput, "for"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.For, _token.Range.End);
+            if (StartsWithKeyword(trimmedInput, "while"))
+                return _token = new Token(trimmedInput.Subsegment(0, 5), TokenType.While, _token.Range.End);
             if (StartsWithKeyword(trimmedInput, "use"))
                 return _token = new Token(trimmedInput.Subsegment(0, 3), TokenType.Use, _token.Range.End);
             if (StartsWithKeyword(trimmedInput, "mod"))

@@ -10,7 +10,7 @@ namespace Compiler.ParseTree
     {
         public AST.IExpr? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, bool ignored = false); // func only for the moment
 
-        public bool IsBlock() => this is BlockExpr _ or IfExpr _;
+        public bool IsBlock() => this is BlockExpr _ or IfExpr _ or WhileExpr _;
 
     }
 }

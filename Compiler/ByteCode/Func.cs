@@ -26,22 +26,24 @@ namespace Compiler.ByteCode
 
         public void WriteTo(Module module, ByteList list)
         {
-            List<KeyValuePair<Block, (int Pos, Int16 Size)>> branches = new();
+            List<(int Pos, Block Block)> branches = new();
+            Dictionary<Block, int> blockPositions = new();
 
             for (int i = 0; i < Blocks.Count; i++)
             {
                 Block block = Blocks[i];
-
-                if (block.BrInstruction == null)
-                    throw new Exception("Branch instruction is null");
-
-                int branchesCount = branches.Count;
-
-                int initialSize = list.Count;
-                Console.WriteLine("InitialSize: " + initialSize);
+                blockPositions.Add(block, list.Count);
 
                 foreach (var instruction in block.Instructions)
                     instruction.WriteTo(module, list);
+
+                if (block.BrInstruction == null)
+                {
+                    if (i + 1 == Blocks.Count)
+                        throw new Exception("Last block should have a branch instruction");
+                    else
+                        continue;
+                }
 
                 if (block.BrInstruction.Value.OpCode == BrOpCode.Ret)
                 {
@@ -66,39 +68,35 @@ namespace Compiler.ByteCode
                     if (trueBlock == nextBlock && falseBlock != null)
                     {
                         list.Add(BrInstruction.BrFalse);
-                        branches.Add(new(falseBlock, (list.Count, 0)));
+                        branches.Add((list.Count, falseBlock));
                     }
                     else if (falseBlock == nextBlock && trueBlock != null)
                     {
                         list.Add(BrInstruction.BrTrue);
-                        branches.Add(new(trueBlock, (list.Count, 0)));
+                        branches.Add((list.Count, trueBlock));
                     }
                     else if (trueBlock != null && falseBlock == null)
                     {
                         list.Add(BrInstruction.Br);
-                        branches.Add(new(trueBlock, (list.Count, 0)));
+                        branches.Add((list.Count, trueBlock));
                     }
                     else
                         throw new Exception("Invalid branch instruction");
 
                     list.Add((Int16)0);
                 }
+            }
 
-                if (branchesCount == 0)
-                    continue;
-
-                var size = (Int16)(list.Count - initialSize);
-                for (int j = 0; j < branchesCount; j++)
+            foreach (var branch in branches)
+            {
+                if (blockPositions.TryGetValue(branch.Block, out var pos))
                 {
-                    var branch = branches[j];
-                    if (branch.Key == block)
-                    {
-                        list.WriteAt(branch.Value.Pos, branch.Value.Size);
-                        continue;
-                    }
-                    branches[j] = new(branch.Key, (branch.Value.Pos, (Int16)(branch.Value.Size + size)));
+                    var offset = pos - branch.Pos - 2;
+                    list.WriteAt(branch.Pos, (Int16)offset);
+                    continue;
                 }
-                branches.RemoveAll(branch => branch.Key == block);
+
+                throw new Exception("Invalid Branch");
             }
         }
 

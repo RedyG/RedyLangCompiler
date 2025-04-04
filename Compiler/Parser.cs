@@ -78,7 +78,7 @@ namespace Compiler
 
             if (lexer.Token.Type != TokenType.LCurly)
             {
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
                 throw new Exception(); // TODO: idk how to handle this
             }
 
@@ -91,6 +91,24 @@ namespace Compiler
             var @else = ParseExpr(moduleFile);
 
             return new IfExpr(new TextRange(start, @else.Range.End), condition, then, @else);
+        }
+
+        private IExpr ParseWhile(ModuleFile moduleFile)
+        {
+            var start = lexer.Token.Range.Start;
+            lexer.Consume();
+
+            var condition = ParseExpr(moduleFile);
+
+            if (lexer.Token.Type != TokenType.LCurly)
+            {
+                Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
+                throw new Exception(); // TODO: idk how to handle this
+            }
+
+            var body = ParseExpr(moduleFile);
+
+            return new WhileExpr(new TextRange(start, body.Range.End), condition, body);
         }
 
         private ReturnExpr ParseReturn(ModuleFile moduleFile)
@@ -162,6 +180,8 @@ namespace Compiler
                     return ParseBlock(moduleFile);
                 case TokenType.If:
                     return ParseIf(moduleFile);
+                case TokenType.While:
+                    return ParseWhile(moduleFile);
                 case TokenType.Return:
                     return ParseReturn(moduleFile);
                 default:

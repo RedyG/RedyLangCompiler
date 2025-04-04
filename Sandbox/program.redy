@@ -6,11 +6,9 @@ type Person = struct {
 };
 
 fn main() {
-  var person = Person { age: 20, height: 200 };
-  modify(&person.height);
-  person.height
-}
-
-fn modify(a: &i32) {
-  *a = 10
+  var a = 0;
+  while a < 10 {
+	a = a + 1;
+  }
+  a
 }

@@ -123,6 +123,16 @@ namespace Compiler
             Error(new Log(moduleFile, "mismatched types", new(ifExpr.Condition.Range, $"expected `bool` because it's the condition of an if expression, found `{type}`")));
         }
 
+        public static void MismatchedTypesWhileCond(ModuleFile moduleFile, AST.IType type, WhileExpr whileExpr)
+        {
+            Error(new Log(moduleFile, "mismatched types", new(whileExpr.Condition.Range, $"expected `bool` because it's the condition of a while expression, found `{type}`")));
+        }
+
+        public static void MismatchedTypesWhileBody(ModuleFile moduleFile, AST.IType type, WhileExpr whileExpr)
+        {
+            Error(new Log(moduleFile, "mismatched types", new(whileExpr.Range, $"expected `void` because it's the body of a while expression, found `{type}`")));
+        }
+
         public static void MismatchedTypesOp(ModuleFile moduleFile, AST.IType expected, AST.IType found, BinOpNode opNode)
         {
             Error(new Log(moduleFile, "mismatched types", new(opNode.Range, $"cannot {opNode.Op.ToSentenceFormat()} the type `{found}` to the type `{expected}`")));
