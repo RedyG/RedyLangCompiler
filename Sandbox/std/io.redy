@@ -1,0 +1,12 @@
+﻿mod std::io;
+
+[Intrinsic]
+pub fn print() {
+  return;
+}
+
+pub fn test() -> i32 {
+	var a = 0;
+	var b = 1;
+	return a + b;
+}

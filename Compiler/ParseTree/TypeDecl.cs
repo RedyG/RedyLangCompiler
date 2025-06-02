@@ -11,12 +11,14 @@ namespace Compiler.ParseTree
     {
         public bool IsAlias { get; }
         public ModuleFile ModuleFile { get; }
+        public Attributes? Attributes { get; }
         public VisibilityNode VisibilityNode { get; }
         public Identifier Identifier { get; }
         public Type Type { get; }
 
-        public TypeDecl(ModuleFile moduleFile, VisibilityNode visibilityNode, Identifier identifier, Type type, bool isAlias)
+        public TypeDecl(ModuleFile moduleFile, VisibilityNode visibilityNode, Attributes? attributes, Identifier identifier, Type type, bool isAlias)
         {
+            Attributes = attributes;
             ModuleFile = moduleFile;
             VisibilityNode = visibilityNode;
             Identifier = identifier;

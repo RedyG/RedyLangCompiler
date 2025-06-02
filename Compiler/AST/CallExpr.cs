@@ -28,7 +28,12 @@ namespace Compiler.AST
             {
                 func.LastBlock.Instructions.Add(Instruction.CreateAlloca(@struct.Size()));
             }
-            func.LastBlock.Instructions.Add(Instruction.CreateCall(Func.CodeGen(funcs)));
+
+            var intrinsic = Func.Proto.Intrinsic;
+            if (intrinsic.HasValue)
+                func.LastBlock.Instructions.Add(Instruction.CreateCallIntrinsic(intrinsic.Value));
+            else
+                func.LastBlock.Instructions.Add(Instruction.CreateCall(Func.CodeGen(funcs)));
         }
     }
 }

@@ -40,6 +40,11 @@ namespace Compiler.ByteCode
             list.Add(value);
         }
 
+        public void Add(char value)
+        {
+            list.AddRange(Encoding.UTF8.GetBytes([value]));
+        }
+
         public void Add(Int16 value)
         {
             AddLeRange(BitConverter.GetBytes(value));
@@ -83,6 +88,13 @@ namespace Compiler.ByteCode
         public void Add(string value)
         {
             list.AddRange(Encoding.UTF8.GetBytes(value));
+        }
+
+        public void AddRString(string value)
+        {
+            Add((UInt32)value.Length);
+            list.AddRange(Encoding.UTF8.GetBytes(value));
+            Add('\0');
         }
 
         public void Add(IEnumerable<byte> value)

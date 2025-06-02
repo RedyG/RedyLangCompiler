@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Compiler.ByteCode
 {
+    /* format:
+     * redylang
+     * 
+     * 
+     */
     public class Module
     {
         private const int ProtocolFuncSize = 12;
@@ -13,7 +18,7 @@ namespace Compiler.ByteCode
         public List<Func> ImportedFuncs { get; } = new();
         public List<Func> Funcs { get; } = new();
 
-        public void WriteTo(ByteList list)
+        public void WriteTo(ByteList list, string root)
         {
             list.Add("redylang"); // magic number
             list.Add((Int64)0); // version
@@ -24,7 +29,8 @@ namespace Compiler.ByteCode
             foreach (var func in ImportedFuncs)
             {
                 list.Add((UInt16)func.GetId());
-                list.Add(Path.GetFileNameWithoutExtension(func.Module!.FileName) + "\0"); // TODO: nested not just file name
+                var path = Path.GetRelativePath(root, func.Module!.FileName).Replace("\\", "/").Split(".")[0];
+                list.AddRString(path); // TODO: nested not just file name
             }
 
             int funcsStart = list.Count;

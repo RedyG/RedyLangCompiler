@@ -351,7 +351,7 @@ namespace Compiler
             List<Proto> protos = new List<Proto>();
             while (lexer.Token.Type != TokenType.RCurly)
             {
-               var proto = ParseProto(moduleFile, new VisibilityNode(new TextRange(), Visibility.Pub));
+                var proto = ParseProto(moduleFile, new VisibilityNode(new TextRange(), Visibility.Pub), null); // TODO: add attributes
                 if (lexer.Token.Type == TokenType.Semicolon)
                 {
                      protos.Add(proto);
@@ -411,7 +411,7 @@ namespace Compiler
             return identifier;
         }
 
-        private Proto ParseProto(ModuleFile moduleFile, VisibilityNode visibility)
+        private Proto ParseProto(ModuleFile moduleFile, VisibilityNode visibility, Attributes? attributes)
         {
             lexer.Consume(); // consume fn
             var identifier = ParseIdentifier();
@@ -441,32 +441,32 @@ namespace Compiler
                 returnType = ParseType(moduleFile);
             }
 
-            return new Proto(visibility, identifier, @params, returnType, moduleFile);
+            return new Proto(visibility, attributes, identifier, @params, returnType, moduleFile);
         }
 
-        private Func ParseFunc(ModuleFile moduleFile, VisibilityNode visibility)
+        private Func ParseFunc(ModuleFile moduleFile, VisibilityNode visibility, Attributes? attributes)
         {
-            var proto = ParseProto(moduleFile, visibility);
+            var proto = ParseProto(moduleFile, visibility, attributes);
             if (lexer.Token.Type != TokenType.LCurly)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
             var body = ParseExpr(moduleFile);
             return new Func(proto, body);
         }
 
-        public void ParseTypeDecl(ModuleFile moduleFile, VisibilityNode visibility)
+        public void ParseTypeDecl(ModuleFile moduleFile, VisibilityNode visibility, Attributes? attributes)
         {
             bool isAlias = lexer.Token.Type == TokenType.Alias;
             lexer.Consume(); // consume type
             var identifier = ParseIdentifier();
             if (lexer.Token.Type != TokenType.Assign)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Assign });
+                Logger.UnexpectedToken(lexer, [TokenType.Assign]);
             lexer.Consume();
             var type = ParseType(moduleFile);
             if (lexer.Token.Type != TokenType.Semicolon)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Semicolon });
+                Logger.UnexpectedToken(lexer, [TokenType.Semicolon]);
             lexer.Consume();
 
-            moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, identifier, type, isAlias));
+            moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, attributes, identifier, type, isAlias));
         }
 
         public void ParseUse(ModuleFile moduleFile, VisibilityNode visibilityNode)
@@ -531,8 +531,9 @@ namespace Compiler
             var funcs = new List<Func>();
             while (lexer.Token.Type != TokenType.RCurly)
             {
+                var attributes = ParseAttributes();
                 var visiblity = ParseVisiblity();
-                funcs.Add(ParseFunc(moduleFile, visiblity));
+                funcs.Add(ParseFunc(moduleFile, visiblity, attributes));
             }
 
             lexer.Consume();
@@ -551,9 +552,38 @@ namespace Compiler
             return new VisibilityNode(new TextRange(), Visibility.Priv);
         }
 
+        private Attributes? ParseAttributes()
+        {
+            var start = lexer.Token.Range.Start;
+            if (lexer.Token.Type != TokenType.LSquare)
+                return null;
+
+            lexer.Consume();
+            var identifiers = new List<Identifier>();
+            while (lexer.Token.Type != TokenType.RSquare)
+            {
+                if (lexer.Token.Type != TokenType.Identifier)
+                    Logger.UnexpectedToken(lexer, [TokenType.Identifier]);
+
+                identifiers.Add(ParseIdentifier());
+
+                if (lexer.Token.Type == TokenType.Comma)
+                {
+                    lexer.Consume();
+                    continue;
+                }
+
+                if (lexer.Token.Type != TokenType.RSquare)
+                    Logger.UnexpectedToken(lexer, [TokenType.Comma, TokenType.RSquare]);
+            }
+
+            var attributes = new Attributes(new TextRange(start, lexer.Token.Range.End), identifiers);
+            lexer.Consume(); // consume rsquare
+            return attributes;
+        }
+
         public Module Parse(Project project, Lexer lexer)
         {
-
             this.project = project;
             this.lexer = lexer;
 
@@ -562,35 +592,44 @@ namespace Compiler
             lexer.Consume();
 
             if (lexer.Token.Type != TokenType.Mod)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Mod });
+                Logger.UnexpectedToken(lexer, [TokenType.Mod]);
             lexer.Consume();
 
-            var identifer = ParseIdentifier();
-            if (lexer.Token.Type != TokenType.Semicolon)
-                Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.Semicolon });
-            lexer.Consume();
-
-            if (!project.Modules.TryGetValue(identifer.Name, out var module))
+            List<Identifier> identifiers = [];
+            while (true)
             {
-                module = new Module(project, identifer.Name);
-                project.Modules.Add(identifer.Name, module);
+                var identifer = ParseIdentifier();
+                identifiers.Add(identifer);
+                if (lexer.Token.Type == TokenType.Semicolon)
+                {
+                    lexer.Consume();
+                    break;
+                }
+                else if (lexer.Token.Type == TokenType.DoubleColon)
+                {
+                    lexer.Consume();
+                    continue;
+                }
+                Logger.UnexpectedToken(lexer, [TokenType.Semicolon, TokenType.DoubleColon]);
             }
 
+            var module = project.Modules.CreateModule(project, identifiers.Select(identifier => identifier.Name).ToList());
             var moduleFile = new ModuleFile(module, lexer.FileName);
             module.ModuleFiles.Add(moduleFile);
 
 
             while (lexer.Token.Type != TokenType.Unknown)
             {
+                var attributes = ParseAttributes();
                 var visiblity = ParseVisiblity();
                 switch (lexer.Token.Type)
                 {
                     case TokenType.Fn:
-                        var func = ParseFunc(moduleFile, visiblity);
+                        var func = ParseFunc(moduleFile, visiblity, attributes);
                         moduleFile.Funcs.Add(func.Proto.Identifier.Name, func);
                         break;
                     case TokenType.Type or TokenType.Alias:
-                        ParseTypeDecl(moduleFile, visiblity);
+                        ParseTypeDecl(moduleFile, visiblity, attributes);
                         break;
                     case TokenType.Use:
                         ParseUse(moduleFile, visiblity);

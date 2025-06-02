@@ -16,14 +16,16 @@ namespace Compiler.AST
 
         public ByteCode.Module CodeGen(Dictionary<Func, ByteCode.Func> funcSymbols)
         {
-            var importedFuncs = ImportedFuncs.Select(func =>
+            var importedFuncs = ImportedFuncs.Where(func => !func.Proto.IsIntrisic).Select(func =>
                 func.CodeGen(funcSymbols)
             ).ToList();
 
             List<ByteCode.Func> funcs = [
-                ..Funcs.Select(func => func.CodeGen(funcSymbols)),
-                ..Project.GetModuleMethods(this).Select(func =>
-                func.CodeGen(funcSymbols)
+                ..Funcs.Where(func => !func.Proto.IsIntrisic).Select(func =>
+                    func.CodeGen(funcSymbols)
+                ),
+                ..Project.GetModuleMethods(this).Where(func => !func.Proto.IsIntrisic).Select(func =>
+                    func.CodeGen(funcSymbols)
                 )
             ];
 

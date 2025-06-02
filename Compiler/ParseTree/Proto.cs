@@ -10,13 +10,15 @@ namespace Compiler.ParseTree
     public class Proto
     {
         public ModuleFile ModuleFile { get; }
+        public Attributes? Attributes { get; } = null;
         public VisibilityNode VisibilityNode { get; }
         public Type? ReturnType { get; }
         public Identifier Identifier { get; }
         public List<Param> Params { get; }
 
-        public Proto( VisibilityNode visibilityNode, Identifier identifier, List<Param> @params, Type? returnType, ModuleFile moduleFile)
+        public Proto(VisibilityNode visibilityNode, Attributes? attributes, Identifier identifier, List<Param> @params, Type? returnType, ModuleFile moduleFile)
         {
+            Attributes = attributes;
             VisibilityNode = visibilityNode;
             ReturnType = returnType;
             Identifier = identifier;
@@ -31,8 +33,10 @@ namespace Compiler.ParseTree
             if (@params.Any(p => p == null))
                 return null;
 
+            var attributes = Attributes?.Identifiers.Select(attr => attr.Name.ToString()).ToList() ?? [];
+
             if (ReturnType == null)
-                return new AST.Proto(new AST.IType.Void(), @params, Identifier.Name.ToString(), moduleFile);
+                return new AST.Proto(new AST.IType.Void(), @params, attributes, Identifier.Name.ToString(), moduleFile);
 
             var returnType = ReturnType.ToAST(decl, globals, new());
             if (returnType == null)
@@ -41,7 +45,7 @@ namespace Compiler.ParseTree
                 return null;
             }
             
-            return new AST.Proto(returnType, @params, Identifier.Name.ToString(), moduleFile);
+            return new AST.Proto(returnType, @params, attributes, Identifier.Name.ToString(), moduleFile);
         }
         public AST.Proto? ToAST(Decl decl, GlobalSymbols globals, ScopedSymbols scopedSymbols, AST.Proto proto)
         {

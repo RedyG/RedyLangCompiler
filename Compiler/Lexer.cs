@@ -34,6 +34,8 @@ namespace Compiler
         RParen,
         LCurly,
         RCurly,
+        LSquare,
+        RSquare,
         RArrow,
         Semicolon,
         Colon,
@@ -86,6 +88,8 @@ namespace Compiler
             TokenType.RParen => ")",
             TokenType.LCurly => "{",
             TokenType.RCurly => "}",
+            TokenType.LSquare => "[",
+            TokenType.RSquare => "]",
             TokenType.RArrow => "->",
             TokenType.Semicolon => ";",
             TokenType.Colon => ":",
@@ -198,7 +202,7 @@ namespace Compiler
         }
 
         private static bool StartsWithKeyword(StringSegment input, string keyword)
-            => input.StartsWith(keyword, StringComparison.CurrentCulture) && char.IsWhiteSpace(input[keyword.Length]);
+            => input.StartsWith(keyword, StringComparison.CurrentCulture) && (char.IsWhiteSpace(input[keyword.Length]) || input[keyword.Length] == ';');
 
         public Token Consume()
         {
@@ -241,6 +245,10 @@ namespace Compiler
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.LCurly, _token.Range.End);
                 case '}':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.RCurly, _token.Range.End);
+                case '[':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.LSquare, _token.Range.End);
+                case ']':
+                    return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.RSquare, _token.Range.End);
                 case ';':
                     return _token = new Token(trimmedInput.Subsegment(0, 1), TokenType.Semicolon, _token.Range.End);
                 case ':':

@@ -111,7 +111,7 @@ File.WriteAllBytes("testAST.redy", list.ToArray());*/
 var parser = new Parser();
 var project = new Compiler.ParseTree.Project();
 parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\program.redy"));
-//parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\fib.redy"));
+parser.Parse(project, new Lexer("C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox\\std\\io.redy"));
 var projectAST = project.ToAST();
 if (Logger.CompilationFailed || projectAST == null)
     return;
@@ -123,7 +123,14 @@ var byteModules = projectAST.Modules.Select(
     ).ToList();
 foreach (var byteModule in byteModules)
 {
+    var root = "C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox";
     var list = new Compiler.ByteCode.ByteList();
-    byteModule.WriteTo(list);
-    File.WriteAllBytes($@"C:\Users\minio\OneDrive\Bureau\redy_test\{Path.GetFileNameWithoutExtension(byteModule.FileName)}.rasm", list.ToArray());
+    byteModule.WriteTo(list, root);
+
+    var path = $@"C:\Users\minio\OneDrive\Bureau\redy_test\{Path.GetRelativePath(root, byteModule.FileName).Split(".")[0]}.rasm";
+    var directory = Path.GetDirectoryName(path);
+    if (!Directory.Exists(directory))
+        Directory.CreateDirectory(directory);
+ 
+    File.WriteAllBytes(path, list.ToArray());
 }

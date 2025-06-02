@@ -55,7 +55,9 @@ namespace Compiler.ByteCode
                 }
                 else if (block.BrInstruction.Value.OpCode == BrOpCode.Exit)
                 {
-                    list.Add(BrInstruction.Exit);
+                    list.Add((byte)OpCode.CallIntrinsic);
+                    list.Add((UInt16)0);
+                    list.Add(BrInstruction.Ret);
                 }
                 else
                 {

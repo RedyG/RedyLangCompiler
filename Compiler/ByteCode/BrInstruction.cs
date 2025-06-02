@@ -21,9 +21,8 @@ namespace Compiler.ByteCode
         public const byte Br = 0x01;
         public const byte BrTrue = 0x02;
         public const byte BrFalse = 0x03;
-        public const byte Exit = 0x04;
-        public const byte Ret = 0x06;
-        public const byte RetVoid = 0x07;
+        public const byte Ret = 0x08;
+        public const byte RetVoid = 0x09;
 
 
         public readonly BrOpCode OpCode;

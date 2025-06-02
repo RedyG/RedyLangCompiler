@@ -14,12 +14,14 @@ namespace Compiler.ByteCode
         // Br i16
         // BrTrue i16
         // BrFalse i16
-        // Exit,
 
-        Call = 0x05, // u16
+        Call = 0x04, // u16
+        CallIntrinsic, // u16
+        CallIndirect,
+        CallExternal,
         // Ret
         // RetVoid
-        Pop = 0x08,
+        Pop = 0x0A,
         Dup,
         LocalGet, // u16
         LocalSet, // u16
@@ -29,7 +31,7 @@ namespace Compiler.ByteCode
         I32Const, // i32
         I64Const, // i64
 
-        I32Eqz = 0x10,
+        I32Eqz = 0x12,
         I32Eq,
         I32Ne,
         I32Lt,
@@ -41,7 +43,7 @@ namespace Compiler.ByteCode
         I32Ge,
         U32Ge,
 
-        I64Eq = 0x1C,
+        I64Eq = 0x1D,
         I64Ne,
         I64Lt,
         U64Lt,
@@ -196,6 +198,7 @@ namespace Compiler.ByteCode
         }
 
         public static Instruction CreateCall(Func func) => new Instruction(OpCode.Call, func);
+        public static Instruction CreateCallIntrinsic(Intrinsic intrinsic) => new Instruction(OpCode.CallIntrinsic, (UInt16)intrinsic);
         public static Instruction CreateLocalGet(UInt16 id) => new Instruction(OpCode.LocalGet, id);
         public static Instruction CreateLocalSet(UInt16 id) => new Instruction(OpCode.LocalSet, id);
 
@@ -263,6 +266,7 @@ namespace Compiler.ByteCode
                     list.Add((UInt16)module.GetFuncId(func!));
                     break;
 
+                case OpCode.CallIntrinsic:
                 case OpCode.LocalGet:
                 case OpCode.LocalSet:
                     list.Add(u16);

@@ -11,6 +11,7 @@ namespace Compiler.ParseTree
     {
         public StringSegment Name = StringSegment.Empty;
         public List<ModuleFile> ModuleFiles = new();
+        public Dictionary<StringSegment, ParseTree.Module> Modules { get; } = new();
 
         public Project Project { get; }
 

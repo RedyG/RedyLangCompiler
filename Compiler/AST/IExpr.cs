@@ -11,5 +11,6 @@ namespace Compiler.AST
     {
         public IType Type { get; }
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols);
+
     }
 }

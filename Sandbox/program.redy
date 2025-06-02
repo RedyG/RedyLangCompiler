@@ -1,4 +1,5 @@
 mod test;
+use std::io::{print, test};
 
 type Person = struct {
   age: i32,
@@ -7,8 +8,7 @@ type Person = struct {
 
 fn main() {
   var a = 0;
-  while a {
-	a = a + 1;
-  }
-  a
+  print();
+  a = a + test();
+  return a;
 }

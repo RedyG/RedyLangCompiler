@@ -33,7 +33,7 @@ namespace Compiler.ParseTree
 
             foreach (var useDecl in UseDecls)
             {
-                var module = Module.Project.Modules[useDecl.Path[0].Name];
+                var module = Module.Project.Modules.GetModule(useDecl.Path);
 
                 foreach (var import in useDecl.Imported)
                 {

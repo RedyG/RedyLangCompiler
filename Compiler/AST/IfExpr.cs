@@ -40,7 +40,7 @@ namespace Compiler.AST
             }
 
 
-            // holy shit, basically not adding the merging stuff if the blocks have their branching of their own already ( like ret )
+            // not adding the merging stuff if the blocks have their branching of their own already ( like ret )
             if ((thenBlock.BrInstruction != null && elseBlock == null) || (thenBlock.BrInstruction != null && elseBlock != null && elseBlock.BrInstruction != null))
             {
                 if (elseBlock == null)
