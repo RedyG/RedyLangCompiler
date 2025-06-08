@@ -13,12 +13,16 @@ namespace Compiler.AST
         public Proto Proto { get; set; }
         public IExpr? Body { get; set; }
 
-        public ByteCode.Func CodeGen(Dictionary<Func, ByteCode.Func> funcs)
+        public ByteCode.Func CodeGen(Dictionary<Func, ByteCode.Func> funcs, ByteCode.Module? module = null)
         {
+            if (Body == null)
+                throw new InvalidOperationException("Function body cannot be null.");
+
             if (funcs.TryGetValue(this, out var func))
                 return func;
 
             func = new ByteCode.Func(Proto.Params.Count, 0);
+            func.Module = module;
             var symbols = new CodeGenSymbols();
             foreach (var param in Proto.Params)
             {

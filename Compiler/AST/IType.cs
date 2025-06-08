@@ -13,6 +13,15 @@ namespace Compiler.AST
         public IType ToConcrete() => this;
         public IType DeRef() => this;
 
+        public class String : IType
+        {
+            public bool Equals(IType? other) => other is String;
+
+            public bool IsEmpty => false;
+            public uint Size() => 8; // Pointer size for string
+            public override string ToString() => "string";
+        }
+
         public class Struct : IType
         {
             public List<Field> Fields { get; set; } = new List<Field>();

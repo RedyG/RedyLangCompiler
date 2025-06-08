@@ -58,6 +58,7 @@ namespace Compiler
 
         Identifier,
         IntLiteral,
+        StringLiteral
     }
 
     public static class TokenTypeExtensions
@@ -108,6 +109,7 @@ namespace Compiler
             TokenType.Amp => "&",
             TokenType.Identifier => "Identifier",
             TokenType.IntLiteral => "IntLiteral",
+            TokenType.StringLiteral => "\"\"",
         };
     }
 
@@ -229,6 +231,12 @@ namespace Compiler
             }
 
             var trimmedInput = new StringSegment(Input).Subsegment(_token.Range.End.Pos);
+
+            if (trimmedInput[0] == '"')
+            {
+                var end = trimmedInput.Subsegment(1).IndexOf('"');
+                 return _token = new Token(trimmedInput.Subsegment(1, end), TokenType.StringLiteral, _token.Range.End.AddLength(1), _token.Range.End.AddLength(end + 2));
+            }
 
             if (trimmedInput.StartsWith("->", StringComparison.CurrentCulture))
                 return _token = new Token(trimmedInput.Subsegment(0, 2), TokenType.RArrow, _token.Range.End);

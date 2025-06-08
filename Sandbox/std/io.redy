@@ -1,12 +1,16 @@
 ﻿mod std::io;
 
 [Intrinsic]
-pub fn print() {
-  return;
-}
+pub fn print(msg: string);
 
-pub fn test() -> i32 {
-	var a = 0;
-	var b = 1;
-	return a + b;
-}
+[Intrinsic]
+pub fn println(msg: string);
+
+[Intrinsic]
+pub fn readln() -> string;
+
+[Intrinsic]
+pub fn read_file(path: string) -> string;
+
+[Intrinsic]
+pub fn write_file(path: string, content: string);

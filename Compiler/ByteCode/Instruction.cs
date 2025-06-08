@@ -120,7 +120,8 @@ namespace Compiler.ByteCode
         GcMalloc,
 
         MemCpy,
-        MemCpyS
+        MemCpyS,
+        PtrLoadConst,
     }
 
     public class InvalidInstructionException : Exception
@@ -252,10 +253,11 @@ namespace Compiler.ByteCode
 
         public static Instruction CreateAlloca(UInt32 size) => new Instruction(OpCode.Alloca, size);
         public static Instruction CreateAllocaPop(UInt32 size) => new Instruction(OpCode.AllocaPop, size);
-        public static Instruction CreateGcMalloc(UInt32 size) => new Instruction(OpCode.GcMalloc, size);
 
         public static Instruction CreateMemCpy(Int32 dst, Int32 src, UInt32 size) => new Instruction(OpCode.MemCpy, dst, src, size);
         public static Instruction CreateMemCpyS(UInt32 size) => new Instruction(OpCode.MemCpyS, size);
+
+        public static Instruction CreatePtrLoadConst(UInt32 offset) => new Instruction(OpCode.PtrLoadConst, offset);
 
         public void WriteTo(Module module, ByteList list)
         {
@@ -298,8 +300,8 @@ namespace Compiler.ByteCode
 
                 case OpCode.Alloca:
                 case OpCode.AllocaPop:
-                case OpCode.GcMalloc:
                 case OpCode.MemCpyS:
+                case OpCode.PtrLoadConst:
                     list.Add(u32);
                     break;
 

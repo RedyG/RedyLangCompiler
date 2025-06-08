@@ -27,6 +27,11 @@ namespace Compiler.ByteCode
             list.AddRange(range);
         }
 
+        public void Add(ByteList bytes)
+        {
+            AddLeRange(bytes.ToArray());
+        }
+
         public void Add(sbyte value)
         {
             unsafe

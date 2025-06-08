@@ -9,11 +9,11 @@ namespace Compiler.ParseTree
     public class Func : Decl
     {
         public Proto Proto { get; }
-        public IExpr Body { get; }
+        public IExpr? Body { get; }
 
         public ModuleFile ModuleFile => Proto.ModuleFile;
 
-        public Func(Proto proto, IExpr body)
+        public Func(Proto proto, IExpr? body)
         {
             Proto = proto;
             Body = body;
@@ -39,6 +39,9 @@ namespace Compiler.ParseTree
             var proto = Proto.ToAST(this, globals, scopedSymbols, func.Proto);
             if (proto == null)
                 return null;
+
+            if (Body == null)
+                return func;
 
             var body = Body.ToAST(this, globals, scopedSymbols);
             if (body == null)

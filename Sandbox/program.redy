@@ -1,5 +1,5 @@
 mod test;
-use std::io::{print, test};
+use std::io::{println, read_file, write_file};
 
 type Person = struct {
   age: i32,
@@ -7,8 +7,12 @@ type Person = struct {
 };
 
 fn main() {
-  var a = 0;
-  print();
-  a = a + test();
-  return a;
+  var a = "hello";
+  var b = read_file("C:\Users\minio\OneDrive\Bureau\graphs\test\test.txt");
+  var c = a + b;
+  println(c);
+  write_file("C:\Users\minio\OneDrive\Bureau\graphs\test\test.txt", c);
+
+
+  return;
 }

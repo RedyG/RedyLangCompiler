@@ -51,6 +51,8 @@ namespace Compiler.ParseTree
                             return new AST.IType.I32();
                         case "void":
                             return new AST.IType.Void();
+                        case "string":
+                            return new AST.IType.String();
                         default:
                             var typeDecl = decl.ModuleFile.Module.GetType(identifier.Identifer);
                             if (typeDecl == null)

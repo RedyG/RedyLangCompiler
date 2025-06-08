@@ -9,8 +9,14 @@ namespace Compiler.ByteCode
     public enum Intrinsic : UInt16
     {
         Exit,
+
         Print,
         Println,
         ReadLine,
+
+        ReadFile,
+        WriteFile,
+
+        StringConcat,
     }
 }

@@ -165,6 +165,10 @@ namespace Compiler
                         return new StructConstructorExpr(new ParseTree.Type.Identifier(identifier), namedArgs, new TextRange(identifier.Range.Start, end));
 
                     }
+                case TokenType.StringLiteral:
+                    var stringExpr = new StringExpr(lexer.Token.Range, lexer.Token.Content);
+                    lexer.Consume();
+                    return stringExpr;
                 case TokenType.LParen:
                 {
                     var start = lexer.Token.Range.Start;
@@ -447,6 +451,11 @@ namespace Compiler
         private Func ParseFunc(ModuleFile moduleFile, VisibilityNode visibility, Attributes? attributes)
         {
             var proto = ParseProto(moduleFile, visibility, attributes);
+            if (lexer.Token.Type == TokenType.Semicolon)
+            {
+                lexer.Consume();
+                return new Func(proto, null); // function without body
+            }
             if (lexer.Token.Type != TokenType.LCurly)
                 Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
             var body = ParseExpr(moduleFile);

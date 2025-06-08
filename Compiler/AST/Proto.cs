@@ -28,6 +28,9 @@ namespace Compiler.AST
         {
             "print" => ByteCode.Intrinsic.Print,
             "println" => ByteCode.Intrinsic.Println,
+            "readln" => ByteCode.Intrinsic.ReadLine,
+            "read_file" => ByteCode.Intrinsic.ReadFile,
+            "write_file" => ByteCode.Intrinsic.WriteFile,
             _ => null
         } : null;
 

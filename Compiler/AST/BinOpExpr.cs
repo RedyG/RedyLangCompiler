@@ -24,16 +24,17 @@ namespace Compiler.AST
             Right = right;
         }
 
-        private OpCode GetOpCode() => (Type, Op) switch
+        private Instruction GetInstruction() => (Type, Op) switch
         {
-            (IType.I32, BinOp.Mul) => OpCode.I32Mul,
-            (IType.I32, BinOp.Div) => OpCode.I32Div,
-            (IType.I32, BinOp.Add) => OpCode.I32Add,
-            (IType.I32, BinOp.Sub) => OpCode.I32Sub,
-            (IType.Bool, BinOp.Lt) => OpCode.I32Lt,
-            (IType.Bool, BinOp.Le) => OpCode.I32Le,
-            (IType.Bool, BinOp.Gt) => OpCode.I32Gt,
-            (IType.Bool, BinOp.Ge) => OpCode.I32Ge,
+            (IType.I32, BinOp.Mul) => new Instruction(OpCode.I32Mul),
+            (IType.I32, BinOp.Div) => new Instruction(OpCode.I32Div),
+            (IType.I32, BinOp.Add) => new Instruction(OpCode.I32Add),
+            (IType.I32, BinOp.Sub) => new Instruction(OpCode.I32Sub),
+            (IType.Bool, BinOp.Lt) => new Instruction(OpCode.I32Lt),
+            (IType.Bool, BinOp.Le) => new Instruction(OpCode.I32Le),
+            (IType.Bool, BinOp.Gt) => new Instruction(OpCode.I32Gt),
+            (IType.Bool, BinOp.Ge) => new Instruction(OpCode.I32Ge),
+            (IType.String, BinOp.Add) => Instruction.CreateCallIntrinsic(Intrinsic.StringConcat),
 
             (_, _) => throw new NotImplementedException()
         };
@@ -65,7 +66,7 @@ namespace Compiler.AST
 
             Left.CodeGen(func, funcs, symbols);
             Right.CodeGen(func, funcs, symbols);
-            func.LastBlock.Instructions.Add(new Instruction(GetOpCode()));
+            func.LastBlock.Instructions.Add(GetInstruction());
         }
     }
 }
