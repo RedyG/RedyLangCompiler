@@ -120,7 +120,8 @@ var funcSymbols = new Dictionary<Func, Compiler.ByteCode.Func>();
 var byteModules = projectAST.Modules.Select(
     module =>
     module.CodeGen(funcSymbols)
-    ).ToList();
+).ToList();
+
 foreach (var byteModule in byteModules)
 {
     var root = "C:\\Users\\minio\\source\\repos\\RedyLangCompiler\\Sandbox";

@@ -21,7 +21,13 @@ namespace Compiler.AST
         // TODO: optimize for single field struct or less than 64 bits
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
-            func.LastBlock.Instructions.Add(Instruction.CreateAlloca(Type.Size()));
+            //func.LastBlock.Instructions.Add(Instruction.CreateAlloca(Type.Size()));
+            var type = Type.ToConcrete() as IType.Struct;
+            if (type == null)
+                throw new InvalidOperationException("StructConstructorExpr can only be used with concrete struct types.");
+
+            func.LastBlock.Instructions.Add(Instruction.CreatePtrLoadConst(type.GetTypeInfoOffset(func.Module)));
+            func.LastBlock.Instructions.Add(new Instruction(OpCode.GcMalloc));
             foreach (var (field, value) in Args)
             {
                 value.CodeGen(func, funcs, symbols);

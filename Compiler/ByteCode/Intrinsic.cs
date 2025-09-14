@@ -17,6 +17,11 @@ namespace Compiler.ByteCode
         ReadFile,
         WriteFile,
 
+        ListPush,
+        ListPop,
+
+        ArrLen,
+
         StringConcat,
     }
 }

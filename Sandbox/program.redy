@@ -1,18 +1,6 @@
 mod test;
 use std::io::{println, read_file, write_file};
 
-type Person = struct {
-  age: i32,
-  height: i32,
-};
-
 fn main() {
-  var a = "hello";
-  var b = read_file("C:\Users\minio\OneDrive\Bureau\graphs\test\test.txt");
-  var c = a + b;
-  println(c);
-  write_file("C:\Users\minio\OneDrive\Bureau\graphs\test\test.txt", c);
-
-
-  return;
+	var arr: array<i32> = array<i32>::new(5);
 }

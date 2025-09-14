@@ -59,7 +59,10 @@ namespace Compiler.AST
                 {
                     access.LValue.CodeGen(func, funcs, symbols);
                     Right.CodeGen(func, funcs, symbols);
-                    func.LastBlock.Instructions.Add(Instruction.CreateMemCpy((Int32)access.Field.Offset(), 0, access.Field.Type.Size())); 
+                    if (access.Field.Type.ToConcrete() is IType.Struct structType)
+                        func.LastBlock.Instructions.Add(Instruction.CreateMemCpy((Int32)access.Field.Offset(), 0, access.Field.Type.Size())); 
+                    else
+                        func.LastBlock.Instructions.Add(Instruction.CreateStore(access.Field.Type.Size(), (Int32)access.Field.Offset()));
                 }
                 return;
             }

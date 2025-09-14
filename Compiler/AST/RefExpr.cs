@@ -24,7 +24,7 @@ namespace Compiler.AST
             if (Expr is VarUseExpr varUse)
             {
                 varUse.CodeGen(func, funcs, symbols);
-                func.LastBlock.Instructions.Pop(); // remove the load instruction, we want the ref
+                //func.LastBlock.Instructions.Pop(); // remove the load instruction, we want the ref
                 return;
             }
 

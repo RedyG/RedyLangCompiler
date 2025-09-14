@@ -364,7 +364,7 @@ namespace Compiler
                 }
 
                 if (lexer.Token.Type != TokenType.LCurly)
-                    Logger.UnexpectedToken(lexer, new TokenType[] { TokenType.LCurly });
+                    Logger.UnexpectedToken(lexer, [TokenType.LCurly]);
 
                 var body = ParseExpr(moduleFile);
                 funcs.Add(new Func(proto, body));
@@ -391,7 +391,13 @@ namespace Compiler
             if (lexer.Token.Type == TokenType.Trait)
                 return ParseTrait(moduleFile);
 
-            return new ParseTree.Type.Identifier(ParseIdentifier());
+            var identifier = ParseIdentifier();
+
+            if (lexer.Token.Type == TokenType.Lt)
+            {
+
+            }
+
         }
 
         private Param ParseParam(ModuleFile moduleFile)
@@ -467,6 +473,23 @@ namespace Compiler
             bool isAlias = lexer.Token.Type == TokenType.Alias;
             lexer.Consume(); // consume type
             var identifier = ParseIdentifier();
+            List<GenericParam> genericParams = [];
+            if (lexer.Token.Type == TokenType.Lt)
+            {
+                lexer.Consume();
+
+                while (lexer.Token.Type != TokenType.Gt)
+                {
+                    var paramIdentifier = ParseIdentifier();
+                    genericParams.Add(new GenericParam { Identifier = paramIdentifier });
+                    if (lexer.Token.Type != TokenType.Colon)
+                        Logger.UnexpectedToken(lexer, [TokenType.Colon]);
+                    lexer.Consume();
+                }
+
+                lexer.Consume();
+            }
+
             if (lexer.Token.Type != TokenType.Assign)
                 Logger.UnexpectedToken(lexer, [TokenType.Assign]);
             lexer.Consume();
@@ -475,7 +498,7 @@ namespace Compiler
                 Logger.UnexpectedToken(lexer, [TokenType.Semicolon]);
             lexer.Consume();
 
-            moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, attributes, identifier, type, isAlias));
+            moduleFile.TypeDecls.Add(identifier.Name, new TypeDecl(moduleFile, visibility, attributes, identifier, type, isAlias, genericParams));
         }
 
         public void ParseUse(ModuleFile moduleFile, VisibilityNode visibilityNode)

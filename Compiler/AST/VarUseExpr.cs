@@ -21,8 +21,8 @@ namespace Compiler.AST
         public void CodeGen(ByteCode.Func func, Dictionary<Func, ByteCode.Func> funcs, CodeGenSymbols symbols)
         {
             func.LastBlock.Instructions.Add(Instruction.CreateLocalGet((UInt16)symbols.VarIds[Var]));
-            if (Var.Refs.Count > 0 && Type.Size() <= 8)
-                func.LastBlock.Instructions.Add(Instruction.CreateLoad(Var.Type.Size(), 0));
+            //if (Var.Refs.Count > 0 && Type.Size() <= 8)
+            //    func.LastBlock.Instructions.Add(Instruction.CreateLoad(Var.Type.Size(), 0));
         }
     }
 }

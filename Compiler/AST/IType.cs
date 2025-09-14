@@ -24,8 +24,32 @@ namespace Compiler.AST
 
         public class Struct : IType
         {
-            public List<Field> Fields { get; set; } = new List<Field>();
+            public List<Field> Fields { get; set; } = [];
+            public List<GenericParam> GenericParams;
+
             public bool IsEmpty => false;
+
+            private uint? constOffset = null;
+
+            public uint GetTypeInfoOffset(ByteCode.Module module)
+            {
+                if (constOffset.HasValue)
+                    return constOffset.Value;
+
+                var offset = module.AddConst(byteList =>
+                {
+                    var refs = Fields.Where(f => f.Type.ToConcrete() is Ref);
+                    byteList.Add((UInt32)Size());
+                    byteList.Add((UInt32)refs.Count());
+                    foreach (var @ref in refs)
+                        byteList.Add((UInt32)@ref.Offset());
+                });
+
+                constOffset = offset;
+                return offset;
+            }
+
+
 
             public bool Equals(IType? other)
             {
@@ -168,5 +192,13 @@ namespace Compiler.AST
         }
     }
 
+    public readonly struct GenericParam
+    {
+        public readonly string Name;
 
+        public GenericParam(string name)
+        {
+            Name = name;
+        }
+    }
 }

@@ -118,6 +118,7 @@ namespace Compiler.ByteCode
         Alloca,
         AllocaPop,
         GcMalloc,
+        GcMallocArr,
 
         MemCpy,
         MemCpyS,
@@ -254,6 +255,8 @@ namespace Compiler.ByteCode
         public static Instruction CreateAlloca(UInt32 size) => new Instruction(OpCode.Alloca, size);
         public static Instruction CreateAllocaPop(UInt32 size) => new Instruction(OpCode.AllocaPop, size);
 
+        public static Instruction CreateMallocArr(UInt32 count) => new Instruction(OpCode.GcMallocArr, count);
+
         public static Instruction CreateMemCpy(Int32 dst, Int32 src, UInt32 size) => new Instruction(OpCode.MemCpy, dst, src, size);
         public static Instruction CreateMemCpyS(UInt32 size) => new Instruction(OpCode.MemCpyS, size);
 
@@ -300,6 +303,7 @@ namespace Compiler.ByteCode
 
                 case OpCode.Alloca:
                 case OpCode.AllocaPop:
+                case OpCode.GcMallocArr:
                 case OpCode.MemCpyS:
                 case OpCode.PtrLoadConst:
                     list.Add(u32);

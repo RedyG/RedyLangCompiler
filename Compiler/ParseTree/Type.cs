@@ -12,7 +12,7 @@ namespace Compiler.ParseTree
     public record Type
     {
         public record Struct(List<Field> Fields, TextRange Range) : Type;
-        public record Identifier(ParseTree.Identifier Identifer) : Type;
+        public record Identifier(ParseTree.Identifier Identifer, List<Type> GenericParams) : Type;
         public record Trait(List<Func> Funcs, List<Proto> Protos, TextRange Range) : Type
         {
             public void ToAST(GlobalSymbols globals, AST.IType.Trait traitAST)
@@ -75,10 +75,10 @@ namespace Compiler.ParseTree
                     var @params = funcPtr.Params.Select(param => param.ToAST(decl, globals, scopedSymbols) as AST.VarDeclStatement).ToList();
 
                     if (@params.Any(p => p.Type == null))
-                                           return null;
+                        return null;
 
                     return new AST.IType.FuncPtr(@params, returnType);
-                case Trait trait:   
+                case Trait trait:
                     var traitAST = new AST.IType.Trait(); // todo fix this caching stuff
                     globals.TypesAST.Add(trait, traitAST);
                     traitAST.Funcs = trait.Funcs.Select(func => func.Register(globals, null)).ToList()!;
@@ -108,5 +108,10 @@ namespace Compiler.ParseTree
             Ref r => r.Range,
             _ => throw new NotImplementedException()
         };
+    }
+
+    public struct GenericParam
+    {
+        public Identifier Identifier { get; init; }
     }
 }
